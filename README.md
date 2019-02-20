@@ -13,7 +13,7 @@ Partial Least Squares implementation in Python
 
 Take 'cv' for example, its output includes 'cv_result' and 'cal_result'.
 
-     'cal_result' including:
+    'cal_result' including:
         'b':（回归系数，(2126,5)）
         't2_limit': (t2阈值，(6,5))
         'leverage_limit': (杠杆值阈值，(5,))
@@ -41,7 +41,6 @@ Take 'cv' for example, its output includes 'cv_result' and 'cal_result'.
         'y_fvalue': (y残差F分布统计量，(60,5))
         'y_fprob': (y残差F分布累积概率值，(60,5))
         'y_tvalue': (y学生化残差，(60,5))  # 学生化残差
-        1.5	其它(也可以按照上述规则归类)
         'x_sample_residuals': (60,5)
         'x_variable_residuals': (2126,5)
         'x_total_residuals': (1,5)
