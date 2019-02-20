@@ -28,7 +28,7 @@
 * Multiplicative Scatter Correction 多元散射校正, MSC
 * Multiplicative Scatter Correction + Savitzky-Golay 多元散射校正+求导, MSCSG
 * Vector Normalization 矢量归一化, VN
-* #### tandard Normal Variate transformation 标准正态变换, SNV
+* tandard Normal Variate transformation 标准正态变换, SNV
 * Eliminate Constant Offset 消除常数偏移量, ECO
 * Subtract Straight Line 减去一条直线, SSL
 * De-Trending 去趋势, DT
