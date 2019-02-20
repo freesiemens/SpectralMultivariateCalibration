@@ -1,9 +1,9 @@
 # SpectraAnalysis
 ## Partial Least Squares implementation in Python
-> Provides
+### Provides
 1. PartialLeastSquares(CrossValidation, ValsetValidation, Prediction)
->> -- CrossValidation, cv
->> -- ValsetValidation, vv
+> -- CrossValidation, cv
+> -- ValsetValidation, vv
 #### -- Prediction, predict
 #### ++ It should be pointed out that before using 'predict', 'cv' or 'vv' must be run first.
 
