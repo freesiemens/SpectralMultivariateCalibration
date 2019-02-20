@@ -1,11 +1,13 @@
 # SpectraAnalysis
-## Partial Least Squares implementation in Python
+Partial Least Squares implementation in Python
+------------
 
 ### Provides
 1. PartialLeastSquares(CrossValidation, ValsetValidation, Prediction)
 * CrossValidation, cv
 * ValsetValidation, vv
 * Prediction, predict
+
 ###### It should be pointed out that before using 'predict', 'cv' or 'vv' must be run first.
 
 2. Three PLS Algorithm:
@@ -41,11 +43,13 @@
 * Zscore Standardization 标准化, ZS
 
 
-
 Requirements
 ------------
 
 Written using Python 3.6.3, numpy 1.15.4, scipy 1.1.0
+
+Acknowledgement
+------------
 
 References
 ----------
