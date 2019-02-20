@@ -14,7 +14,7 @@ Partial Least Squares implementation in Python
 Take 'cv' for example, its output includes 'cv_result' and 'cal_result'.
 
     'cal_result' including:
-        'b':（回归系数，(2126,5)）
+        'b': (回归系数，(2126,5))
         't2_limit': (t2阈值，(6,5))
         'leverage_limit': (杠杆值阈值，(5,))
         'q_limit': (Q残差阈值，(6,5)，最后一列nan)
