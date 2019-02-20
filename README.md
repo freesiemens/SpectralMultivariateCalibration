@@ -1,4 +1,5 @@
-# SpectraAnalysis
+SpectraAnalysis
+
 Partial Least Squares implementation in Python
 ------------
 
