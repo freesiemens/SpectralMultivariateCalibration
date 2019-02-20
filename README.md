@@ -1,21 +1,22 @@
 # SpectraAnalysis
 ## Partial Least Squares implementation in Python
+
 ### Provides
 1. PartialLeastSquares(CrossValidation, ValsetValidation, Prediction)
-> -- CrossValidation, cv
- -- ValsetValidation, vv
-#### -- Prediction, predict
-#### ++ It should be pointed out that before using 'predict', 'cv' or 'vv' must be run first.
+* -- CrossValidation, cv
+* -- ValsetValidation, vv
+* -- Prediction, predict
+###### ++ It should be pointed out that before using 'predict', 'cv' or 'vv' must be run first.
 
 2. Three PLS Algorithm:
-#### -- Improved Kernel Partial Least Squares, IKPLS
-#### -- Nonlinear Iterative Partial Least Squares，NIPALS
-#### -- Straightforward Implementation of a statistically inspired Modification of the Partial Least Squares, SIMPLS
+* -- Improved Kernel Partial Least Squares, IKPLS
+* -- Nonlinear Iterative Partial Least Squares，NIPALS
+* -- Straightforward Implementation of a statistically inspired Modification of the Partial Least Squares, SIMPLS
 
 3. Several Sampling Algorithm:
-#### -- montecarlo_sampling
-#### -- ks_sampling(Kennard-Stone)
-#### -- spxy_sampling
+* -- montecarlo_sampling
+* -- ks_sampling(Kennard-Stone)
+* -- spxy_sampling
 
 4. Several Samples split Algorithm:
 #### -- samples_systematic_split
