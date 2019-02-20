@@ -49,8 +49,12 @@ Requirements
 
 Written using Python 3.6.3, numpy 1.15.4, scipy 1.1.0
 
+
 Acknowledgement
 ------------
+
+OPUS by Bruker, Unscrambler by CAMO, Pirouette by Infometrix, PLS_Toolbox by Eigenvector
+
 
 References
 ----------
