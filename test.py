@@ -5,8 +5,10 @@
 Email: jiangsukust@163.com
 
 """
-from SpectraAnalysis.pypls import *
+
+import numpy as np
 import scipy.io as sio
+from .pypls import *
 
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
