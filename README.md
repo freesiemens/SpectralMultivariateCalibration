@@ -1,11 +1,11 @@
 # SpectraAnalysis
-Partial Least Squares implementation in Python
-==== Provides ==== 
-  1. PartialLeastSquares(CrossValidation, ValsetValidation, Prediction)
-     -- CrossValidation, cv
-     -- ValsetValidation, vv
-     -- Prediction, predict
-     ++ It should be pointed out that before using 'predict', 'cv' or 'vv' must be run first.
+#### Partial Least Squares implementation in Python
+> Provides
+1. PartialLeastSquares(CrossValidation, ValsetValidation, Prediction)
+-- CrossValidation, cv
+-- ValsetValidation, vv
+-- Prediction, predict
+++ It should be pointed out that before using 'predict', 'cv' or 'vv' must be run first.
 
   2. Three PLS Algorithm:
      -- Improved Kernel Partial Least Squares, IKPLS
@@ -38,5 +38,3 @@ Partial Least Squares implementation in Python
      -- SSL + SG, SSLSG
      -- Mean Centering 均值中心化, MC
      -- Zscore Standardization 标准化, ZS
-
-"""
