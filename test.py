@@ -22,7 +22,7 @@ target = data['con']  # (621, 1) concentration of Nicotine in tobacco leaf
 wavelength = spectra[0, :]  # 10001 - 3999 cm-1
 
 # ================== samples split(Kennard-Stone) ==================
-# divide the total samples to 3 parts: calset, valset, testset
+# divide the total samples into 3 parts: calset, valset, testset
 calset_indices, valset_indices, testset_indices = samples_ks_split(absorbance, val_size=0.2, test_size=0.2)
 xcal = np.vstack((wavelength, absorbance[calset_indices, :]))
 ycal = target[calset_indices]
