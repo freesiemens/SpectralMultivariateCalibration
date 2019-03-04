@@ -13,6 +13,50 @@ Provides
      -- Prediction, predict
      ++ It should be pointed out that before using 'predict', 'cv' or 'vv' must be run first.
 
+     Take 'cv' for example, its output includes 'cv_result' and 'cal_result'.
+
+     'cal_result' including:
+        'b': (回归系数，(2126,5))
+        't2_limit': (t2阈值，(6,5))
+        'leverage_limit': (杠杆值阈值，(5,))
+        'q_limit': (Q残差阈值，(6,5)，最后一列nan)
+        't_critical_value': (y学生化残差阈值，(6,5))
+        'r2': (决定系数R2，(5,))
+        'press': (预测残差平方和，(5,))
+        'rmsec': (RMSEC校正均方根误差，(5,))
+        'sec': (SEC校正标准偏差，(5,))
+        'rpd': (RPD，(5,))
+        'bias': (Bias，(5,))
+        'x_loadings': (X载荷，(2126,5))
+        'x_scores_weights': (X权重，(2126,5))
+        'linear_regression_coefficient': (包含斜率Slope和截距Offset，(2,5))
+        'fitting_x_list': (list, 每个元素代表1个隐变量下的拟合光谱矩阵)
+        'residual_matrix_list': (list, 每个元素代表1个隐变量下的残差光谱矩阵)
+        'fit_value': (拟合值，(60,5))
+        'y_residual': (拟合残差，(60,5))
+        'x_residual': (X残差，(60,5))
+        't2': (T2，(60,5))
+        'leverage': (Leverage，(60,5))
+        'x_scores': (X得分，(60,5))
+        'x_fvalue': (X残差F分布统计量，(60,5))
+        'x_fprob': (X残差F分布累积概率值，(60,5))
+        'y_fvalue': (y残差F分布统计量，(60,5))
+        'y_fprob': (y残差F分布累积概率值，(60,5))
+        'y_tvalue': (y学生化残差，(60,5))  # 学生化残差
+        1.5	其它(也可以按照上述规则归类)
+        'x_sample_residuals': (60,5)
+        'x_variable_residuals': (2126,5)
+        'x_total_residuals': (1,5)
+        'explained_x_sample_variance': (60,5)
+        'explained_x_variable_variance': (2126,5)
+        'explained_x_total_variance': (1,5)
+        'explained_x_variance_ratio': (1,5)
+        'x_outlier_indices_list':
+        'y_outlier_indices_list':
+        'just_x_outlier_list':
+        'just_y_outlier_list':
+        'both_xy_outlier_list':
+
   2. Three PLS Algorithm:
      -- Improved Kernel Partial Least Squares, IKPLS
      -- Nonlinear Iterative Partial Least Squares，NIPALS

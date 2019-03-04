@@ -6,10 +6,10 @@ Email: jiangsukust@163.com
 
 """
 
-import numpy as np
 import scipy.io as sio
-from SpectraAnalysis.pypls import *
 
+from NineLight.PLSProject.Chemometrics import *
+from SpectraAnalysis.pypls import *
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -21,8 +21,10 @@ absorbance = data['ab']  # (621, 1557) 621 samples's nir spectra, 1557 data poin
 target = data['con']  # (621, 1) concentration of Nicotine in tobacco leaf
 wavelength = spectra[0, :]  # 10001 - 3999 cm-1
 
+
+
 # ================== samples split(Kennard-Stone) ==================
-# divide the total samples to 3 parts: calset, valset, testset
+# divide the total samples into 3 parts: calset, valset, testset
 calset_indices, valset_indices, testset_indices = samples_ks_split(absorbance, val_size=0.2, test_size=0.2)
 xcal = np.vstack((wavelength, absorbance[calset_indices, :]))
 ycal = target[calset_indices]
@@ -32,6 +34,12 @@ xtest = np.vstack((wavelength, absorbance[testset_indices, :]))
 ytest = target[testset_indices]
 
 
+
+mpa = MPA(max_nlv=20, pretreat_method1='SG', server_ip='localhost', request_port=18678)
+result = mpa.mpaor(xcal, ycal)
+outlier_indices = result['outlier_indices']
+sample_error_mean_abs = result['sample_error_mean_abs']
+sample_error_std = result['sample_error_std']
 # ================== start computing ==================
 # Note: In PartialLeastSquares Class, all X inputs should include 'wavelength'
 # 'pretreat_method2' include 'MC' and 'ZS'
