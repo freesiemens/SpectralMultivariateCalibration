@@ -8,7 +8,7 @@ Email: jiangsukust@163.com
 
 import scipy.io as sio
 
-from NineLight.PLSProject.Chemometrics import *
+from NineLight.PLSProject.Chemometrics_190923 import *
 from SpectraAnalysis.pypls import *
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
