@@ -5,7 +5,7 @@
 Email: jiangsukust@163.com
 
 """
-print()
+
 import scipy.io as sio
 
 from NineLight.PLSProject.Chemometrics_190923 import *
@@ -34,12 +34,6 @@ xtest = np.vstack((wavelength, absorbance[testset_indices, :]))
 ytest = target[testset_indices]
 
 
-
-mpa = MPA(max_nlv=20, pretreat_method1='SG', server_ip='localhost', request_port=18678)
-result = mpa.mpaor(xcal, ycal)
-outlier_indices = result['outlier_indices']
-sample_error_mean_abs = result['sample_error_mean_abs']
-sample_error_std = result['sample_error_std']
 # ================== start computing ==================
 # Note: In PartialLeastSquares Class, all X inputs should include 'wavelength'
 # 'pretreat_method2' include 'MC' and 'ZS'
