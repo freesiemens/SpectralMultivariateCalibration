@@ -13,10 +13,14 @@ Provides
      -- Prediction, predict
      ++ It should be pointed out that before using 'predict', 'cv' or 'vv' must be run first.
 
-     Take 'cv' for example, its output includes 'cv_result' and 'cal_result'.
+     Take 'cv' for example, its outputs include 'cv_result' and 'cal_result'.
+
+     Assume the DataSet consists of 80 spectra, 700 wavelength points, the max num of latent variable is 5.
+
+     The cal_result's outputs are as following:
 
      'cal_result' including:
-        'b': (回归系数，(2126,5))
+        'b': (回归系数，(700,5))
         't2_limit': (t2阈值，(6,5))
         'leverage_limit': (杠杆值阈值，(5,))
         'q_limit': (Q残差阈值，(6,5)，最后一列nan)
@@ -27,28 +31,27 @@ Provides
         'sec': (SEC校正标准偏差，(5,))
         'rpd': (RPD，(5,))
         'bias': (Bias，(5,))
-        'x_loadings': (X载荷，(2126,5))
-        'x_scores_weights': (X权重，(2126,5))
+        'x_loadings': (X载荷，(700,5))
+        'x_scores_weights': (X权重，(700,5))
         'linear_regression_coefficient': (包含斜率Slope和截距Offset，(2,5))
         'fitting_x_list': (list, 每个元素代表1个隐变量下的拟合光谱矩阵)
         'residual_matrix_list': (list, 每个元素代表1个隐变量下的残差光谱矩阵)
-        'fit_value': (拟合值，(60,5))
-        'y_residual': (拟合残差，(60,5))
-        'x_residual': (X残差，(60,5))
-        't2': (T2，(60,5))
-        'leverage': (Leverage，(60,5))
-        'x_scores': (X得分，(60,5))
-        'x_fvalue': (X残差F分布统计量，(60,5))
-        'x_fprob': (X残差F分布累积概率值，(60,5))
-        'y_fvalue': (y残差F分布统计量，(60,5))
-        'y_fprob': (y残差F分布累积概率值，(60,5))
-        'y_tvalue': (y学生化残差，(60,5))  # 学生化残差
-        1.5	其它(也可以按照上述规则归类)
-        'x_sample_residuals': (60,5)
-        'x_variable_residuals': (2126,5)
+        'fit_value': (拟合值，(80,5))
+        'y_residual': (拟合残差，(80,5))
+        'x_residual': (X残差，(80,5))
+        't2': (T2，(80,5))
+        'leverage': (Leverage，(80,5))
+        'x_scores': (X得分，(80,5))
+        'x_fvalue': (X残差F分布统计量，(80,5))
+        'x_fprob': (X残差F分布累积概率值，(80,5))
+        'y_fvalue': (y残差F分布统计量，(80,5))
+        'y_fprob': (y残差F分布累积概率值，(80,5))
+        'y_tvalue': (y学生化残差，(80,5))  # 学生化残差
+        'x_sample_residuals': (80,5)
+        'x_variable_residuals': (700,5)
         'x_total_residuals': (1,5)
-        'explained_x_sample_variance': (60,5)
-        'explained_x_variable_variance': (2126,5)
+        'explained_x_sample_variance': (80,5)
+        'explained_x_variable_variance': (700,5)
         'explained_x_total_variance': (1,5)
         'explained_x_variance_ratio': (1,5)
         'x_outlier_indices_list':
@@ -92,7 +95,7 @@ Provides
 """
 
 import numpy as np
-from numpy import diag, cumsum, where, dot, outer, zeros, sqrt, mean, sum, min, square
+from numpy import diag, cumsum, where, dot, outer, zeros, sqrt, mean, sum, min, square, inner
 from numpy.linalg import inv, norm
 import scipy.stats as sps
 from scipy.spatial.distance import pdist, squareform
@@ -159,14 +162,8 @@ class PartialLeastSquares(object):
         # sd = np.std(reference_value, axis=0, ddof=1)
         bias = np.mean(error, axis=0)
 
-        # # correlation coefficient
-        # fit_value_mc = fit_value - mean(fit_value, axis=0)
-        # reference_value_mc = reference_value - mean(reference_value, axis=0)
-        # corr_coeff_numerator = np.sum(fit_value_mc * reference_value_mc, axis=0)
-        # corr_coeff_denominator = sqrt(np.sum(fit_value_mc**2, axis=0) * np.sum(reference_value_mc**2, axis=0))
-        # correlation_coefficient = corr_coeff_numerator / corr_coeff_denominator
         # ------------- 数据线性回归(横坐标reference_value, 纵坐标fit_value)
-        # linear_regression_coefficient (2, max_ncomp)  slope, intercept
+        # linear_regression_coefficient (2, max_nlv)  slope, intercept
         linear_regression_coefficient = zeros((2, max_nlv))
 
         # -------------- 校正标准误差 SEC (Standard Error of Calibration, 与自由度有关)
@@ -205,7 +202,7 @@ class PartialLeastSquares(object):
         # 保存pretreat1预处理完的光谱的mean和stdev 为未知样本的pretreat2预处理做准备
         self.calx_pretreated1_mean = np.mean(spec_pretreated1[1:, :], axis=0)
         self.calx_pretreated1_stdev = np.std(spec_pretreated1[1:, :] - self.calx_pretreated1_mean, axis=0, ddof=1)
-        # 保存y的mean和stdev 为未知样本的inverse处理做准备
+        # 保存y的mean和stdev 
         self.caly_mean = np.mean(target, axis=0)
         caly_mc = target - self.caly_mean
         self.caly_stdev = np.std(caly_mc, axis=0, ddof=1)
@@ -256,10 +253,10 @@ class PartialLeastSquares(object):
         else:
             self.pretreat4spec1_cv = 'None'
             spec_pretreated1_cv = spec_cv
-        # 保存pretreat1预处理完的光谱的mean和stdev 为未知样本的pretreat2预处理做准备
+        # 保存pretreat1预处理完的光谱的mean和stdev 
         self.calx_pretreated1_mean_cv = np.mean(spec_pretreated1_cv[1:, :], axis=0)
         self.calx_pretreated1_stdev_cv = np.std(spec_pretreated1_cv[1:, :] - self.calx_pretreated1_mean_cv, axis=0, ddof=1)
-        # 保存y的mean和stdev 为未知样本的inverse处理做准备
+        # 保存y的mean和stdev 
         self.caly_mean_cv = np.mean(target_cv, axis=0)
         caly_mc_cv = target_cv - self.caly_mean_cv
         self.caly_stdev_cv = np.std(caly_mc_cv, axis=0, ddof=1)
@@ -379,7 +376,6 @@ class PartialLeastSquares(object):
                 if h0 < 0.001:
                     h0 = 0.001
                 # .ppf的参数 q ---- lower tail probability
-                # normal deviate corresponding to the upper (1-a) percentile 即 a=0.05时，需要找到95%对应的右尾
                 ca = sps.norm.ppf(1 - sl[j])
                 h1 = ca * sqrt(2 * theta2 * h0 ** 2) / theta1
                 h2 = theta2 * h0 * (h0 - 1) / (theta1 ** 2)
@@ -402,14 +398,11 @@ class PartialLeastSquares(object):
         y_fprob = sps.distributions.f.cdf(y_fvalue, 1, n_samples - 1)
 
         # 计算r2, SEC, press, rpd, bias(全部隐变量)
-        # SEC校正标准误差(与自由度有关) 是用来评估校正集所有样品的近红外方法预测值与参考方法测定值之间差异的标准偏差，
-        # 它代表回归模型的整个残余误差，是校正模型理论上达到的最优准确度的估计量。
-        # 也称校正估计标准误差(SEE，Standard Error of Estimate)
         sec_statistics_result = self._sec_calc(fit_value, calset_target)
         r2 = sec_statistics_result['r2']
         press = sec_statistics_result['press']
         rmsec = sec_statistics_result['rmsec']
-        sec = sec_statistics_result['sep']  # 20190128 与 Unscrambler 保持一致(bias corrected 'RMSEC')
+        sec = sec_statistics_result['sep']  
         rpd = sec_statistics_result['rpd']
         bias = sec_statistics_result['bias']
         linear_regression_coefficient = sec_statistics_result['linear_regression_coefficient']
@@ -417,7 +410,7 @@ class PartialLeastSquares(object):
 
         # ---- 20190115增加y_tvalue(学生化残差)
         prevent_invalid_for_negetive_sqrt = np.seterr(invalid='ignore')
-        y_tvalue = y_residual / (rmsec * sqrt(1 - leverage))  # 20190128 与 Unscrambler 保持一致, 除以RMSEC
+        y_tvalue = y_residual / (rmsec * sqrt(1 - leverage))
 
         # ---- outlier detect
         outlier_dectect_result = outlier_detect(leverage, leverage_limit, y_fprob, calset_indices)
@@ -712,7 +705,6 @@ class PartialLeastSquares(object):
         self.valset_wavelength_intersect = self.valset_spec_intersect[0, :]
         self.valset_ab_intersect = self.valset_spec_intersect[1:, :]
         # -------- 处理variable_indices (indices针对intersect, 而非全谱) --------
-        # 手工选择的谱区或BIPLS得到的谱区; 如果是离散的波长点，则事先已经得到
         if self.customized_regions is not None:
             self.verified_regions = verify_customized_regions(self.calset_wavelength_intersect, self.customized_regions)
             self.variable_indices = generate_variable_indices(self.calset_wavelength_intersect, self.customized_regions)
@@ -935,7 +927,7 @@ class PartialLeastSquares(object):
 
             # ---- 20190128增加y_tvalue(学生化残差)
             prevent_invalid_for_negetive_sqrt = np.seterr(invalid='ignore')
-            y_tvalue = test_y_residual / (rmsep * sqrt(1 - leverage))  # 20190128 与 Unscrambler 保持一致, 除以RMSEP
+            y_tvalue = test_y_residual / (rmsep * sqrt(1 - leverage)) 
 
             # 采用t检验方法确定验证集的预测值与相应的已知参考数据是否有统计意义上的偏差
             significant_difference_tvalue = np.abs(bias) * sqrt(n_test_samples) / sep
@@ -978,7 +970,7 @@ class PartialLeastSquares(object):
 def ikpls_algorithm(ab, target, max_nlv):
     '''
     Improved Kernel Partial Least Squares, IKPLS
-    :param ab: 光谱吸光度矩阵 (100, 2126)
+    :param ab: 光谱吸光度矩阵 (100, 700)
     :param target: (100, 1) or (100,)
     :param max_nlv:
     :return:
@@ -1001,7 +993,7 @@ def ikpls_algorithm(ab, target, max_nlv):
     y_loadings = zeros((1, max_nlv))
     x_weights = zeros((n_variables, max_nlv))
     x_scores_weights = zeros((n_variables, max_nlv))
-    xy = dot(ab.T, target).ravel()  # 此处的ravel非常重要,使得xy变成一维数组
+    xy = dot(ab.T, target).ravel()  
     for i in range(max_nlv): # 0,1,2,3,4
         w = xy
         w = w / sqrt(dot(w.T, w))
@@ -1027,7 +1019,7 @@ def ikpls_algorithm(ab, target, max_nlv):
             'x_weights': x_weights,
             'max_nlv':max_nlv}
 
-def nipals_algorithm(ab, target, max_nlv):  # ab(700,2126) calset_target(700,1)or(700,)  max_nlv(15)
+def nipals_algorithm(ab, target, max_nlv):  # ab(700,700) calset_target(700,1)or(700,)  max_nlv(15)
     '''
     Nonlinear Iterative Partial Least Squares，NIPALS
     :param ab:
@@ -1041,17 +1033,17 @@ def nipals_algorithm(ab, target, max_nlv):  # ab(700,2126) calset_target(700,1)o
     if max_nlv > np.min((n_samples, n_variables)):
         max_nlv = np.min((n_samples, n_variables))
     x_scores = zeros((n_samples, max_nlv))    # (700,15)
-    x_loadings = zeros((n_variables, max_nlv))  # (2126,15)
+    x_loadings = zeros((n_variables, max_nlv))  # (700,15)
     y_loadings = zeros((1, max_nlv))                # (1,15)
-    x_weights = zeros((n_variables, max_nlv))   #(2126,15)
+    x_weights = zeros((n_variables, max_nlv))   #(700,15)
     for i in range(max_nlv):
-        xy = dot(ab.T, target).ravel()  # 此处的ravel非常重要,使得xy变成一维数组
+        xy = dot(ab.T, target).ravel()  
         x_weights[:, i] = xy / norm(xy)
         x_scores[:, i] = dot(ab, x_weights[:, i])
         x_loadings[:, i] = dot(ab.T, x_scores[:, i]) / dot(x_scores[:, i].T, x_scores[:, i])
         y_loadings[0, i] = dot(x_scores[:, i].T, target) / dot(x_scores[:, i].T, x_scores[:, i])
         ab = ab - outer(x_scores[:, i], x_loadings[:, i])   #外积，得到矩阵
-    # 20190127 试图解决了nipals返回结果与ikpls不一致的问题，refer to: R = W * inv(P.T * W)
+
     x_scores_weights = dot(x_weights, inv(dot(x_loadings.T, x_weights)))
     b = cumsum(dot(x_scores_weights, diag(y_loadings.ravel())), axis=1)  #y_loadings拉成一维数组
 
@@ -1072,7 +1064,6 @@ def simpls_algorithm(ab, target, max_nlv):
     if n_samples != target.shape[0]:
         raise ValueError('光谱数量与参考值数量不一致！')
     if max_nlv > np.min((n_samples, n_variables)):
-        # raise ValueError('潜变量数设置过大！')
         max_nlv = np.min((n_samples, n_variables))
     V = zeros((n_variables, max_nlv))
     x_scores = zeros((n_samples, max_nlv))  # X scores (standardized)
@@ -1103,7 +1094,6 @@ def simpls_algorithm(ab, target, max_nlv):
         y_scores[:, i] = u
         V[:, i] = v
     b = cumsum(dot(x_weights, diag(y_loadings.ravel())), axis=1)
-    # 20190127 试图解决nipals和simpls返回结果与ikpls不一致的问题
 
     return {'b': b, 'x_scores': x_scores, 'x_loadings': x_loadings, 'y_loadings': y_loadings, \
             'x_scores_weights': x_weights, 'x_weights': x_weights, 'y_scores':y_scores}
@@ -1149,7 +1139,7 @@ def cv_kfold_systematic_sampling(n_population, kfold=9):
         mask = zeros(n_population, dtype=np.bool)
         test_indices = np.linspace(start=i, stop=kfold*(fold_sizes[i] - 1) + i, num=fold_sizes[i], dtype=int)
         test_indices_list.append(test_indices)
-        mask[test_indices] = True  # 选中的标记True
+        mask[test_indices] = True  
         train_indices = np.arange(n_population)[~mask]
         train_indices_list.append(train_indices)
 
@@ -1260,8 +1250,6 @@ def ks_sampling(X, p=3, population_indices=None):
     n_samples, n_variables = X.shape
     if population_indices is None:
         population_indices = np.arange(n_samples)
-
-    # ------- 使用scipy的pdist计算欧式距离
     D = squareform(pdist(X, metric='euclidean'))
     temp_index = []
     index_2max = where(D == D.max())[0]
@@ -1296,19 +1284,17 @@ def spxy_sampling(X, y, p=3, population_indices=None):
         population_indices = np.arange(n_samples)
     # ----------- 光谱距离计算 -----------
     D_ab = zeros((n_samples, n_samples))
-    for i in range(n_samples - 1):  # 只计算了一次不同光谱之间的距离
+    for i in range(n_samples - 1):  
         for j in range(i+1, n_samples):
             D_ab[i, j] = norm(X[i, :]-X[j, :])
-    D_ab += D_ab.T  # 翻转后叠加, 对称矩阵
+    D_ab += D_ab.T 
     D_ab_max = np.max(D_ab)
-
-
     # ----------- 浓度距离计算 -----------
     D_con = zeros((n_samples, n_samples))
-    for i in range(n_samples - 1):  # 只计算了一次不同光谱之间的距离
+    for i in range(n_samples - 1): 
         for j in range(i+1, n_samples):
             D_con[i, j] = norm(y[i, :]-y[j, :])
-    D_con += D_con.T  # 翻转后叠加, 对称矩阵
+    D_con += D_con.T  
     D_con_max = np.max(D_con)
 
     # ----------- 光谱&浓度距离 -----------
@@ -1354,13 +1340,11 @@ def samples_systematic_split(X, val_size=0.1, test_size=0, population_indices=No
     # -------------- 先挑选 val_test_set，同分布 --------------
     interval_1 = n_population // n_val_test  # 有
 
-    if interval_1 > 1:  # 足够等距采样 (列表推导式)
+    if interval_1 > 1: 
         val_test_indices = np.array([population_indices[interval_1 * i - 1] for i in range(1, n_val_test+1)])
 
     elif interval_1 == 1: # 不够等距采样
-        # (首先间距为2取一次),能取n_population//2个
         val_test_indices_first = np.array([population_indices[2 * i - 1] for i in range(1, n_population//2 + 1)])
-        # 接着再间隔取 (n_val_test - n_population//2)
         val_test_indices_last = np.array([population_indices[2 * i] for i in range(1, n_val_test - n_population//2 + 1)])
         val_test_indices = np.hstack((val_test_indices_first, val_test_indices_last))
 
@@ -1375,9 +1359,9 @@ def samples_systematic_split(X, val_size=0.1, test_size=0, population_indices=No
     # -------------- 再从val_test_set中挑选valset，同分布 --------------
     else:
         interval_2 = n_val_test // n_val  # 先挑选出 valset
-        if interval_2 > 1:  # 足够等距采样 (列表推导式)
+        if interval_2 > 1:  
             val_indices = np.array([val_test_indices[interval_2 * j - 1] for j in range(1, n_val + 1)])
-        elif interval_2 == 1:  # 不够等距采样
+        elif interval_2 == 1:  
             val_indices_first = np.array([val_test_indices[2 * j - 1] for j in range(1, n_val_test//2 + 1)])
             val_indices_last = np.array([val_test_indices[2 * j] for j in range(1, n_val - n_val_test // 2 + 1)])
             val_indices = np.hstack((val_indices_first, val_indices_last))
@@ -1523,7 +1507,7 @@ class PLSR(object):
 
     def fit(self, cal_spec, cal_target):
         '''
-        PLS 回归得到 b, x_scores, x_loadings, y_loadings, x_scores_weights, x_weights, max_ncomp
+        PLS 回归得到 b, x_scores, x_loadings, y_loadings, x_scores_weights, x_weights, max_nlv
         :param cal_ab: 使用pretreat.ConstructCompatiblePLSBand().fit_construct生成
         :param cal_target:
         :return:
@@ -1588,47 +1572,6 @@ class PLSR(object):
 
         return {'predict_value':predict_value}
 
-def generate_polynomial(X, order=1):
-    if X.ndim == 1:
-        X = X[:, np.newaxis]  # 如果一维数组，转成二维
-    n_samples, n_variables = X.shape
-    intercept = np.ones((n_samples, 1))  # offset 截距
-    A = np.hstack((X, intercept))
-    if order > 1:
-        # 高次 ----> 低次
-        for i in range(2, order+1):  # order==2
-            s = X ** i
-            A = np.hstack((s, A))
-
-    return A
-
-def lsr(X, y, order=1):  # 默认1次
-    '''
-    Least Square Regression 最小二乘回归
-    :param X:
-    :param y:
-    :param order: 1,2,3... 适应多项式回归
-    :return:
-    regression_coefficient -
-    fit_value -    fit_transform result (m X 1 column vector)
-    residual -    residual   (m X 1 column vector)
-    '''
-    if X.ndim == 1:
-        X = X[:, np.newaxis]  # 如果一维数组，转成二维
-    if y.ndim == 1:
-        y = y[:, np.newaxis]  # 如果一维数组，转成二维
-    if X.shape[0] != y.shape[0]:
-        raise ValueError('The number of samples is not equal!')
-    n_samples = X.shape[0]
-    A = generate_polynomial(X, order=order)
-    regression_coefficient = dot(dot(inv(dot(A.T, A)), A.T), y)  # 系数(2,1)
-    fit_value = dot(A, regression_coefficient)
-    residual = fit_value - y
-
-    return {'regression_coefficient':regression_coefficient,
-            'fit_value':fit_value,
-            'residual':residual}
-
 def q_calc(calx_loadings, scores, pretreated_data):
     '''
     Usually the statistic Q, also called squared prediction error(SPE),
@@ -1647,29 +1590,29 @@ def q_calc(calx_loadings, scores, pretreated_data):
         scores = scores[:, np.newaxis]  # 如果一维数组，增加至二维数组
     if pretreated_data.ndim == 1:
         pretreated_data = pretreated_data[:, np.newaxis]  # 如果一维数组，增加至二维数组
-    n_samples, n_comp = scores.shape
+    n_samples, n_lv = scores.shape
     n_variables = calx_loadings.shape[0]
-    q = zeros((n_samples, n_comp))  # Sometimes referred to as the Squared Prediction Error (SPE)
-    f_residuals = zeros((n_samples, n_comp))
+    q = zeros((n_samples, n_lv))  # Sometimes referred to as the Squared Prediction Error (SPE)
+    f_residuals = zeros((n_samples, n_lv))
     residual_matrix_list = []
     fitting_x_list = []
-    x_variable_residuals = zeros((n_variables, n_comp))  # (n_variables, n_lv)
-    x_sample_residuals = zeros((n_samples, n_comp))
-    for i in range(n_comp):  # 0:5 ncomp
+    x_variable_residuals = zeros((n_variables, n_lv))  # (n_variables, n_lv)
+    x_sample_residuals = zeros((n_samples, n_lv))
+    for i in range(n_lv):  # 0:5 nlv
         # Q
-        fitting_x_comp = dot(scores[:, :i + 1], calx_loadings[:, :i + 1].T)
-        residual_matrix_comp = pretreated_data - fitting_x_comp
-        residual_matrix_list.append(residual_matrix_comp)
-        fitting_x_list.append(fitting_x_comp)
-        q_comp = np.sum(residual_matrix_comp ** 2, axis=1)
-        f_residuals_comp = sqrt(np.mean(residual_matrix_comp ** 2, axis=1))
-        q[:, i] = q_comp
-        f_residuals[:, i] = f_residuals_comp
-        x_sample_residuals[:, i] = np.sum(residual_matrix_comp ** 2, axis=1) / n_variables
-        x_variable_residuals[:, i] = np.sum(residual_matrix_comp ** 2, axis=0) / n_samples
+        fitting_x_lv = dot(scores[:, :i + 1], calx_loadings[:, :i + 1].T)
+        residual_matrix_lv = pretreated_data - fitting_x_lv
+        residual_matrix_list.append(residual_matrix_lv)
+        fitting_x_list.append(fitting_x_lv)
+        q_lv = np.sum(residual_matrix_lv ** 2, axis=1)
+        f_residuals_lv = sqrt(np.mean(residual_matrix_lv ** 2, axis=1))
+        q[:, i] = q_lv
+        f_residuals[:, i] = f_residuals_lv
+        x_sample_residuals[:, i] = np.sum(residual_matrix_lv ** 2, axis=1) / n_variables
+        x_variable_residuals[:, i] = np.sum(residual_matrix_lv ** 2, axis=0) / n_samples
     x_total_residuals = np.mean(x_variable_residuals, axis=0, keepdims=True)  # (1, n_lv)
     explained_x_sample_variance = (1 - x_sample_residuals / (np.sum(pretreated_data ** 2, axis=1, keepdims=True) / \
-                                                            n_variables)) * 100
+                                                             n_variables)) * 100
     explained_x_variable_variance = (1-x_variable_residuals.T / (np.sum(pretreated_data ** 2, axis=0)/n_samples)) * 100
     explained_x_total_variance = (1 - x_total_residuals / np.mean(pretreated_data ** 2)) * 100
     explained_x_variance_ratio = np.hstack((explained_x_total_variance[:, 0:1], np.diff(explained_x_total_variance)))
@@ -1705,19 +1648,19 @@ def q_calc_cv(calx_loadings, scores, pretreated_data):
         scores = scores[:, np.newaxis]  # 如果一维数组，增加至二维数组
     if pretreated_data.ndim == 1:
         pretreated_data = pretreated_data[:, np.newaxis]  # 如果一维数组，增加至二维数组
-    n_samples, n_comp = scores.shape
+    n_samples, n_lv = scores.shape
     # n_variables = calx_loadings.shape[0]
-    q = zeros((n_samples, n_comp))  # Sometimes referred to as the Squared Prediction Error (SPE)
+    q = zeros((n_samples, n_lv))  # Sometimes referred to as the Squared Prediction Error (SPE)
     residual_matrix_list = []
     fitting_x_list = []
-    for i in range(n_comp):  # 0:5 ncomp
+    for i in range(n_lv):  # 0:5 nlv
         # Q
-        fitting_x_comp = dot(scores[:, :i + 1], calx_loadings[:, :i + 1].T)
-        residual_matrix_comp = pretreated_data - fitting_x_comp
-        residual_matrix_list.append(residual_matrix_comp)
-        fitting_x_list.append(fitting_x_comp)
-        q_comp = np.sum(residual_matrix_comp ** 2, axis=1)
-        q[:, i] = q_comp
+        fitting_x_lv = dot(scores[:, :i + 1], calx_loadings[:, :i + 1].T)
+        residual_matrix_lv = pretreated_data - fitting_x_lv
+        residual_matrix_list.append(residual_matrix_lv)
+        fitting_x_list.append(fitting_x_lv)
+        q_lv = np.sum(residual_matrix_lv ** 2, axis=1)
+        q[:, i] = q_lv
 
     return {'q':q,
             'residual_matrix_list':residual_matrix_list,
@@ -1736,10 +1679,10 @@ def leverage_t2_calc(scores, calx_scores):
         calx_scores = calx_scores[:, np.newaxis]  # 如果一维数组，增加至二维数组
     n_cal_samples = calx_scores.shape[0]
     leverage = zeros((scores.shape[0], scores.shape[1]))
-    for i in range(scores.shape[1]):  # 0:5 ncomp
-        lev_comp = diag(dot(dot(scores[:, :i + 1], inv(dot(calx_scores[:, :i + 1].T, calx_scores[:, :i + 1]))),
+    for i in range(scores.shape[1]):  # 0:5 nlv
+        lev_lv = diag(dot(dot(scores[:, :i + 1], inv(dot(calx_scores[:, :i + 1].T, calx_scores[:, :i + 1]))),
                             scores[:, :i + 1].T)) + 1 / n_cal_samples
-        leverage[:, i] = lev_comp
+        leverage[:, i] = lev_lv
     t2 = (n_cal_samples - 1) * (leverage - 1 / n_cal_samples)
 
     return {'leverage': leverage, 't2': t2}
@@ -1757,10 +1700,10 @@ def leverage_t2_calc_cv(cv_x_scores, calx_scores):
         calx_scores = calx_scores[:, np.newaxis]  # 如果一维数组，增加至二维数组
     n_cal_samples = calx_scores.shape[0]
     leverage = zeros((cv_x_scores.shape[0], cv_x_scores.shape[1]))
-    for i in range(cv_x_scores.shape[1]):  # 0:5 ncomp
-        lev_comp = diag(dot(dot(cv_x_scores[:, :i + 1], inv(dot(calx_scores[:, :i + 1].T, calx_scores[:, :i + 1]))),
+    for i in range(cv_x_scores.shape[1]):  # 0:5 nlv
+        lev_lv = diag(dot(dot(cv_x_scores[:, :i + 1], inv(dot(calx_scores[:, :i + 1].T, calx_scores[:, :i + 1]))),
                             cv_x_scores[:, :i + 1].T)) + 1 / n_cal_samples
-        leverage[:, i] = lev_comp
+        leverage[:, i] = lev_lv
     t2 = (n_cal_samples - 1) * leverage
 
     return {'leverage': leverage, 't2': t2}
@@ -1853,7 +1796,7 @@ def rmse_calc(predict_value, reference_value):
     # correlation_coefficient = corr_coeff_numerator / corr_coeff_denominator
 
     # 数据线性回归(横坐标reference_value, 纵坐标predict_value)
-    # linear_regression_coefficient (2, max_ncomp) slope,intercept
+    # linear_regression_coefficient (2, max_nlv) slope,intercept
     linear_regression_coefficient = zeros((2, max_nlv))
     for i in range(max_nlv):
         reg_coeff = lsr(reference_value, predict_value[:, i], order=1)['regression_coefficient']
@@ -1899,8 +1842,6 @@ def verify_customized_regions(intersect_wavelength, customized_regions, threshol
             temp_list = _check_region(list1, list2, threshold=threshold)
             if len(temp_list) == 2:
                 merged_list.append(temp_list[0])
-        # 假如最后一次比较时剩两个list，则先前已经把第1个加入了，此时需要加入第2个
-        # 假如最后一次比较时剩一个list，则先前没有把第1个加入，此时需要加入第1个
         merged_list.append(temp_list[-1])
     # +++++++++++++++++++++++ validate the merged_list +++++++++++++++++++++++
     n_merged_regions = len(merged_list)
@@ -1922,6 +1863,8 @@ def verify_customized_regions(intersect_wavelength, customized_regions, threshol
             temp_valid = pending_list
         elif pending_start <= valid_start and pending_end >= valid_end:
             temp_valid = [valid_start, valid_end]
+        else:
+            temp_valid = [pending_start, pending_end]
         verified_regions.append(temp_valid)
     if len(verified_regions) == 0:
         raise ValueError('选择的谱区与有效谱区不匹配，请重新选择！')
@@ -1933,7 +1876,7 @@ def generate_variable_indices(intersect_wavelength, customized_regions, threshol
     根据各个兼容光谱形成的有效谱区(波长交集)，来判断自定义的谱区列表，合并重合部分，舍弃多余部分
     :param intersect_wavelength
     :param customized_regions: 二层嵌套列表, like [[4000, 5000], [10000, 7000], [6000, 8000]]
-    :param threshold: cm-1 / nm，用于比较两个区间结合处波数/波长值的大小时，如果小于该值，则将两个区间连接起来
+    :param threshold: cm-1 / nm
     :return:
     '''
     verified_regions = verify_customized_regions(intersect_wavelength, customized_regions, threshold=threshold)
@@ -1949,12 +1892,10 @@ def generate_variable_indices(intersect_wavelength, customized_regions, threshol
             start_index = np.argmin(np.abs(intersect_wavelength - valid_region_start))
             end_index = np.argmin(np.abs(intersect_wavelength - valid_region_end))
 
-            ################### 尽量取宽点 与 OPUS 结果一致，后期可以取消该设置
             if valid_region_start < intersect_wavelength[start_index]:
                 start_index -= 1
             if valid_region_end > intersect_wavelength[end_index]:
                 end_index += 1
-            ################### 尽量取宽点 与 OPUS 结果一致，后期可以取消该设置
 
             indices = np.array(np.arange(start_index, end_index + 1))
             indices_list.append(indices)
@@ -2114,7 +2055,7 @@ class MSC(object):
         else:
             ab_mean = ideal_ab
         for i in range(size_of_ab[0]):  # 求出每条光谱的c和d，c = b[0]   d = b[1]
-            regression_coefficient = _lsr(ab_mean, ab[i, :], order=1)['regression_coefficient']
+            regression_coefficient = lsr(ab_mean, ab[i, :], order=1)['regression_coefficient']
             ab_msc[i, :] = (ab[i, :] - regression_coefficient[1]) / regression_coefficient[0]  # 利用广播法则
 
         spec_msc = np.vstack((wavelength, ab_msc))
@@ -2367,7 +2308,7 @@ class SSL(object):
         n_samples = ab.shape[0]
         ab_ssl = np.zeros(ab.shape)
         for i in range(n_samples):  # 求出趋势直线
-            fit_value = _lsr(wavelength, ab[i, :], order=1)['fit_value']
+            fit_value = lsr(wavelength, ab[i, :], order=1)['fit_value']
             ab_ssl[i, :] = ab[i, :] - fit_value.ravel()
         spec_ssl = np.vstack((wavelength, ab_ssl))
 
@@ -2399,7 +2340,7 @@ class DT(object):
         n_samples = ab.shape[0]
         ab_dt = np.zeros(ab.shape)
         for i in range(n_samples):  # 求出每条光谱的c和d，c = b[0]   d = b[1]
-            fit_value = _lsr(wavelength, ab[i, :], order=2)['fit_value']
+            fit_value = lsr(wavelength, ab[i, :], order=2)['fit_value']
             ab_dt[i, :] = ab[i, :] - fit_value.ravel()
         spec_dt = np.vstack((wavelength, ab_dt))
 
@@ -2673,7 +2614,7 @@ class SNVDT(object):
         n_samples = ab.shape[0]
         ab_dt = np.zeros(ab.shape)
         for i in range(n_samples):  # 求出每条光谱的c和d，c = b[0]   d = b[1]
-            fit_value = _lsr(wavelength, ab[i, :], order=2)['fit_value']
+            fit_value = lsr(wavelength, ab[i, :], order=2)['fit_value']
             ab_dt[i, :] = ab[i, :] - fit_value.ravel()
         spec_dt = np.vstack((wavelength, ab_dt))
 
@@ -2717,7 +2658,7 @@ class SSLSG(object):
         spec_ssl = np.zeros(size_of_spec)
         spec_ssl[0, :] = wavelength
         f_add = np.ones(size_of_spec[1])  # 用于构造A
-        matrix_A = (np.vstack((wavelength, f_add))).T  # 2126 * 2
+        matrix_A = (np.vstack((wavelength, f_add))).T  # 700 * 2
         for i in range(1, size_of_spec[0]):  # 从1开始，不算wavelength
             r = dot(dot(np.linalg.inv(dot(matrix_A.T, matrix_A)), matrix_A.T), spec[i, :])
             spec_ssl[i, :] = spec[i, :] - dot(matrix_A, r)
@@ -2895,7 +2836,7 @@ class ZS4Data(object):
         return data_ori
 
 # +++++++++++++++ Function 用于最小二乘回归 +++++++++++++++
-def _generate_polynomial(X, order=1):
+def generate_polynomial(X, order=1):
     if X.ndim == 1:
         X = X[:, np.newaxis]  # 如果一维数组，转成二维
     n_samples, n_variables = X.shape
@@ -2909,7 +2850,7 @@ def _generate_polynomial(X, order=1):
 
     return A
 
-def _lsr(X, y, order=1):  # 默认1次
+def lsr(X, y, order=1):  # 默认1次
     '''
     Least Square Regression 最小二乘回归
     :param X:
@@ -2928,7 +2869,7 @@ def _lsr(X, y, order=1):  # 默认1次
         raise ValueError('The number of samples is not equal!')
     n_samples = X.shape[0]
     intercept = np.ones((n_samples, 1))  # offset 截距
-    A = _generate_polynomial(X, order=order)
+    A = generate_polynomial(X, order=order)
     regression_coefficient = dot(dot(inv(dot(A.T, A)), A.T), y)  # 系数(2,1)
     fit_value = dot(A, regression_coefficient)
     residual = fit_value - y
@@ -2939,7 +2880,7 @@ def _lsr(X, y, order=1):  # 默认1次
 
 
 
-# ================  Function 用于光谱列表操作 ================
+# ================  Function 用于光谱列表操作，不在PLS中直接使用 ================
 
 # +++++++++++++++ 多样本操作,针对列  +++++++++++++++
 
