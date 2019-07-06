@@ -1,4 +1,4 @@
-SpectraAnalysis
+SpectralMultivariateCalibration
 
 Partial Least Squares implementation in Python
 ------------
@@ -12,6 +12,9 @@ Partial Least Squares implementation in Python
 ###### It should be pointed out that before using 'predict', 'cv' or 'vv' must be run first.
 
 Take 'cv' for example, its output includes 'cv_result' and 'cal_result'.
+
+Assume the DataSet consists of 60 spectra, 2126 wavelength points, the max num of latent variable is 5.
+The cal_result's outputs are as following:
 
     'cal_result' including:
         'b': (回归系数，(2126,5))

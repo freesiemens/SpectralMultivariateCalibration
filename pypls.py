@@ -4,7 +4,7 @@
 @author: JiangSu
 Email: jiangsukust@163.com
 
-===== pypls =====
+============================= pypls =============================
 
 Provides
   1. PartialLeastSquares(CrossValidation, ValsetValidation, Prediction)
