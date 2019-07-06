@@ -13,11 +13,11 @@ Partial Least Squares implementation in Python
 
 Take 'cv' for example, its outputs include 'cv_result' and 'cal_result'.
 
-Assume the DataSet consists of 60 spectra, 2126 wavelength points, the max num of latent variable is 5.
+Assume the DataSet consists of 80 spectra, 700 wavelength points, the max num of latent variable is 5.
 The cal_result's outputs are as following:
 
     'cal_result' including:
-        'b': (回归系数，(2126,5))
+        'b': (回归系数，(700,5))
         't2_limit': (t2阈值，(6,5))
         'leverage_limit': (杠杆值阈值，(5,))
         'q_limit': (Q残差阈值，(6,5)，最后一列nan)
@@ -28,27 +28,27 @@ The cal_result's outputs are as following:
         'sec': (SEC校正标准偏差，(5,))
         'rpd': (RPD，(5,))
         'bias': (Bias，(5,))
-        'x_loadings': (X载荷，(2126,5))
-        'x_scores_weights': (X权重，(2126,5))
+        'x_loadings': (X载荷，(700,5))
+        'x_scores_weights': (X权重，(700,5))
         'linear_regression_coefficient': (包含斜率Slope和截距Offset，(2,5))
         'fitting_x_list': (list, 每个元素代表1个隐变量下的拟合光谱矩阵)
         'residual_matrix_list': (list, 每个元素代表1个隐变量下的残差光谱矩阵)
-        'fit_value': (拟合值，(60,5))
-        'y_residual': (拟合残差，(60,5))
-        'x_residual': (X残差，(60,5))
-        't2': (T2，(60,5))
-        'leverage': (Leverage，(60,5))
-        'x_scores': (X得分，(60,5))
-        'x_fvalue': (X残差F分布统计量，(60,5))
-        'x_fprob': (X残差F分布累积概率值，(60,5))
-        'y_fvalue': (y残差F分布统计量，(60,5))
-        'y_fprob': (y残差F分布累积概率值，(60,5))
-        'y_tvalue': (y学生化残差，(60,5))  # 学生化残差
-        'x_sample_residuals': (60,5)
-        'x_variable_residuals': (2126,5)
+        'fit_value': (拟合值，(80,5))
+        'y_residual': (拟合残差，(80,5))
+        'x_residual': (X残差，(80,5))
+        't2': (T2，(80,5))
+        'leverage': (Leverage，(80,5))
+        'x_scores': (X得分，(80,5))
+        'x_fvalue': (X残差F分布统计量，(80,5))
+        'x_fprob': (X残差F分布累积概率值，(80,5))
+        'y_fvalue': (y残差F分布统计量，(80,5))
+        'y_fprob': (y残差F分布累积概率值，(80,5))
+        'y_tvalue': (y学生化残差，(80,5))  # 学生化残差
+        'x_sample_residuals': (80,5)
+        'x_variable_residuals': (700,5)
         'x_total_residuals': (1,5)
-        'explained_x_sample_variance': (60,5)
-        'explained_x_variable_variance': (2126,5)
+        'explained_x_sample_variance': (80,5)
+        'explained_x_variable_variance': (700,5)
         'explained_x_total_variance': (1,5)
         'explained_x_variance_ratio': (1,5)
         'x_outlier_indices_list':
@@ -107,7 +107,7 @@ References
 ```
 [1] Herschel W. XIII. Investigation of the powers of the prismatic colours to heat and illuminate objects; with remarks, that prove the different refrangibility of radiant heat. To which is added, an inquiry into the method of viewing the sun advantageously, with telescopes of large apertures and high magnifying powers[J]. Philosophical Transactions of the Royal Society of London, 1800, 90: 255-283.
 [2] Wheeler O H. Near infrared spectra: A neglected field of spectral study[J]. Journal of Chemical Education, 1960, 37(5): 234.
-[3] Haaland D M, Thomas E V. Partial least-squares methods for spectral analyses. 1. Relation to other quantitative calibration methods and the extraction of qualitative information[J]. Analytical Chemistry, 1988, 60(11): 1193-1202.
+[3] Haaland D M, Thomas E V. Partial least-squares methods for spectral analyses. 1. Relation to other quantitative calibration methods and the extraction of qualitative information[J]. Analytical Chemistry, 1988, 80(11): 1193-1202.
 [4] Andersson M. A comparison of nine PLS1 algorithms[J]. Journal of Chemometrics, 2009, 23(10): 518-529.
 [5] Wold S, Martens H, Wold H: The multivariate calibration problem in chemistry solved by the PLS method, Kågström B, Ruhe A, editor, Matrix Pencils: Proceedings of a Conference Held at Pite Havsbad, Sweden, March 22–24, 1982, Berlin, Heidelberg: Springer Berlin Heidelberg, 1983: 286-293.
 [6] Strang G. Introduction to Linear Algebra[J], 2009.
