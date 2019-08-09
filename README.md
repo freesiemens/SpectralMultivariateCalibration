@@ -103,7 +103,7 @@ OPUS by Bruker, Unscrambler by CAMO, Pirouette by Infometrix, PLS_Toolbox by Eig
 
 
 References
-----------
+------------
 ```
 [1] Herschel W. XIII. Investigation of the powers of the prismatic colours to heat and illuminate objects; with remarks, that prove the different refrangibility of radiant heat. To which is added, an inquiry into the method of viewing the sun advantageously, with telescopes of large apertures and high magnifying powers[J]. Philosophical Transactions of the Royal Society of London, 1800, 90: 255-283.
 [2] Wheeler O H. Near infrared spectra: A neglected field of spectral study[J]. Journal of Chemical Education, 1960, 37(5): 234.
