@@ -1968,7 +1968,7 @@ class MC(object):
 
 class ZS(object):
     '''
-    Zscore Standardization 标准化
+    Zscore Standardization 中心标准化
     '''
     def __init__(self, avg_ab=None, std_ab=None):
         '''
@@ -2055,7 +2055,7 @@ class MSC(object):
         else:
             ab_mean = ideal_ab
         for i in range(size_of_ab[0]):  # 求出每条光谱的c和d，c = b[0]   d = b[1]
-            regression_coefficient = lsr(ab_mean, ab[i, :], order=1)['regression_coefficient']
+            regression_coefficient = _lsr(ab_mean, ab[i, :], order=1)['regression_coefficient']
             ab_msc[i, :] = (ab[i, :] - regression_coefficient[1]) / regression_coefficient[0]  # 利用广播法则
 
         spec_msc = np.vstack((wavelength, ab_msc))
@@ -2083,9 +2083,10 @@ class MSC(object):
 
         return spec_msc
 
-class MSCSG(object):
+class SGMSC(object):
     '''
-    Multiplicative Scatter Correction + Savitzky-Golay 多元散射校正+求导
+     Savitzky-Golay + Multiplicative Scatter Correction 求导 + 多元散射校正
+     According to the Raman PLS model result of disel in OPUS, we should do SG first!!!
     '''
     def __init__(self, window_size=11, polyorder=2, deriv=1, ideal_ab=None):
         self.window_size = window_size
@@ -2131,10 +2132,12 @@ class MSCSG(object):
             polyorder = np.abs(np.int(polyorder))
         except ValueError as msg:
             raise ValueError("window_size and polyorder have to be of type int")
-        if window_size % 2 != 1 or window_size < 1:
-            raise TypeError("window_size size must be a positive odd number")
-        if window_size < polyorder + 2:
-            raise TypeError("window_size is too small for the polynomials polyorder")
+        if window_size % 2 != 1 or window_size < 2:
+            raise ValueError("window_size size must be a positive odd number")
+        if window_size < polyorder:  # polyorder must be less than window_size
+            raise ValueError("window_size is too small for the polynomials polyorder")
+        if deriv > polyorder:  # 'deriv' must be less than or equal to 'polyorder'
+            raise ValueError("请调小导数阶数！")
 
         n = spec.shape[0] - 1
         p = spec.shape[1]
@@ -2186,11 +2189,11 @@ class MSCSG(object):
 
         return spec_sg_matrix
 
-    def mscsg(self, spec, window_size=11, polyorder=2, deriv=1, ideal_ab=None):
-        spec_msc = self._msc(spec, ideal_ab=ideal_ab)
-        spec_msc_sg = self._sg(spec_msc, window_size=window_size, polyorder=polyorder, deriv=deriv)
+    def sgmsc(self, spec, window_size=11, polyorder=2, deriv=1, ideal_ab=None):
+        spec_sg = self._sg(spec, window_size=window_size, polyorder=polyorder, deriv=deriv)
+        spec_sg_msc = self._msc(spec_sg, ideal_ab=ideal_ab)
 
-        return spec_msc_sg
+        return spec_sg_msc
 
     def fit(self, spec):
         self.wavelength = spec[0, :]
@@ -2199,25 +2202,24 @@ class MSCSG(object):
         return self
 
     def fit_transform(self, spec):
-        self.fit(spec)
-        spec_msc = self._msc(spec)
-        spec_msc_sg = self._sg(spec_msc, window_size=self.window_size, polyorder=self.polyorder,
-                                   deriv=self.deriv)
+        spec_sg = self._sg(spec, window_size=self.window_size, polyorder=self.polyorder, deriv=self.deriv)
+        self.fit(spec_sg)
+        spec_sg_msc = self._msc(spec_sg)
 
-        return spec_msc_sg
+        return spec_sg_msc
 
     def transform(self, input_data):
         input_wavelength = input_data[0, :]
-        spec_msc = self._msc(input_data, ideal_ab=self.ideal_ab)
-        spec_msc_sg = self._sg(spec_msc, window_size=self.window_size, polyorder=self.polyorder,
+        spec_sg = self._sg(input_data, window_size=self.window_size, polyorder=self.polyorder,
                                    deriv=self.deriv)
+        spec_sg_msc = self._msc(spec_sg, ideal_ab=self.ideal_ab)
 
-        return spec_msc_sg
+        return spec_sg_msc
 
 # -------- 单样本操作 --------
 class VN(object):
     '''
-    Vector Normalization 矢量归一化
+    Vector Normalization矢量归一化
     '''
     def __init__(self):
         return
@@ -2308,7 +2310,7 @@ class SSL(object):
         n_samples = ab.shape[0]
         ab_ssl = np.zeros(ab.shape)
         for i in range(n_samples):  # 求出趋势直线
-            fit_value = lsr(wavelength, ab[i, :], order=1)['fit_value']
+            fit_value = _lsr(wavelength, ab[i, :], order=1)['fit_value']
             ab_ssl[i, :] = ab[i, :] - fit_value.ravel()
         spec_ssl = np.vstack((wavelength, ab_ssl))
 
@@ -2340,7 +2342,7 @@ class DT(object):
         n_samples = ab.shape[0]
         ab_dt = np.zeros(ab.shape)
         for i in range(n_samples):  # 求出每条光谱的c和d，c = b[0]   d = b[1]
-            fit_value = lsr(wavelength, ab[i, :], order=2)['fit_value']
+            fit_value = _lsr(wavelength, ab[i, :], order=2)['fit_value']
             ab_dt[i, :] = ab[i, :] - fit_value.ravel()
         spec_dt = np.vstack((wavelength, ab_dt))
 
@@ -2419,10 +2421,12 @@ class SG(object):
             polyorder = np.abs(np.int(polyorder))
         except ValueError as msg:
             raise ValueError("window_size and polyorder have to be of type int")
-        if window_size % 2 != 1 or window_size < 1:
-            raise TypeError("window_size size must be a positive odd number")
-        if window_size < polyorder + 2:
-            raise TypeError("window_size is too small for the polynomials polyorder")
+        if window_size % 2 != 1 or window_size < 2:
+            raise ValueError("window_size size must be a positive odd number")
+        if window_size < polyorder:  # polyorder must be less than window_size
+            raise ValueError("window_size is too small for the polynomials polyorder")
+        if deriv > polyorder:  # 'deriv' must be less than or equal to 'polyorder'
+            raise ValueError("请调小导数阶数！")
 
         n = spec.shape[0] - 1
         p = spec.shape[1]
@@ -2486,9 +2490,9 @@ class SG(object):
         spec_sg = self.sg(input_data, self.window_size, self.polyorder, self.deriv)
         return spec_sg
 
-class SNVSG(object):
+class SGSNV(object):
     '''
-    SNV + Savitzky-Golay
+    Savitzky-Golay + SNV
     '''
     def __init__(self, window_size=11, polyorder=2, deriv=1):
         self.window_size = window_size
@@ -2517,10 +2521,12 @@ class SNVSG(object):
             polyorder = np.abs(np.int(polyorder))
         except ValueError as msg:
             raise ValueError("window_size and polyorder have to be of type int")
-        if window_size % 2 != 1 or window_size < 1:
-            raise TypeError("window_size size must be a positive odd number")
-        if window_size < polyorder + 2:
-            raise TypeError("window_size is too small for the polynomials polyorder")
+        if window_size % 2 != 1 or window_size < 2:
+            raise ValueError("window_size size must be a positive odd number")
+        if window_size < polyorder:  # polyorder must be less than window_size
+            raise ValueError("window_size is too small for the polynomials polyorder")
+        if deriv > polyorder:  # 'deriv' must be less than or equal to 'polyorder'
+            raise ValueError("请调小导数阶数！")
 
         n = spec.shape[0] - 1
         p = spec.shape[1]
@@ -2572,25 +2578,27 @@ class SNVSG(object):
 
         return spec_sg_matrix
 
-    def snvsg(self, spec, window_size=11, polyorder=2, deriv=1):
-        spec_snv = self._snv(spec)
-        spec_snv_sg = self._sg(spec_snv, window_size=window_size, polyorder=polyorder, deriv=deriv)
-        return spec_snv_sg
+    def sgsnv(self, spec, window_size=11, polyorder=2, deriv=1):
+        spec_sg = self._sg(spec, window_size=window_size, polyorder=polyorder, deriv=deriv)
+        spec_sg_snv = self._snv(spec_sg)
+
+        return spec_sg_snv
 
     def fit_transform(self, spec):
         self.wavelength = spec[0, :]
-        spec_snv = self._snv(spec)
-        spec_snv_sg = self._sg(spec_snv, window_size=self.window_size, polyorder=self.polyorder, deriv=self.deriv)
+        spec_sg = self._sg(spec, window_size=self.window_size, polyorder=self.polyorder, deriv=self.deriv)
+        spec_sg_snv = self._snv(spec_sg)
 
-        return spec_snv_sg
+        return spec_sg_snv
 
     def transform(self, input_data):
         input_wavelength = input_data[0, :]
         if not (input_wavelength == self.wavelength).all():
             raise ValueError('光谱数据不兼容！')
-        spec_snv = self._snv(input_data)
-        spec_snv_sg = self._sg(spec_snv, window_size=self.window_size, polyorder=self.polyorder, deriv=self.deriv)
-        return spec_snv_sg
+        spec_sg = self._sg(input_data, window_size=self.window_size, polyorder=self.polyorder, deriv=self.deriv)
+        spec_sg_snv = self._snv(spec_sg)
+
+        return spec_sg_snv
 
 class SNVDT(object):
     '''
@@ -2614,7 +2622,7 @@ class SNVDT(object):
         n_samples = ab.shape[0]
         ab_dt = np.zeros(ab.shape)
         for i in range(n_samples):  # 求出每条光谱的c和d，c = b[0]   d = b[1]
-            fit_value = lsr(wavelength, ab[i, :], order=2)['fit_value']
+            fit_value = _lsr(wavelength, ab[i, :], order=2)['fit_value']
             ab_dt[i, :] = ab[i, :] - fit_value.ravel()
         spec_dt = np.vstack((wavelength, ab_dt))
 
@@ -2642,9 +2650,9 @@ class SNVDT(object):
 
         return spec_snv_dt
 
-class SSLSG(object):
+class SGSSL(object):
     '''
-    SSL + SG  减去一条直线 + 求导
+    SG + SSL  求导 + 减去一条直线
     '''
     def __init__(self, window_size=11, polyorder=2, deriv=1):
         self.window_size = window_size
@@ -2658,7 +2666,7 @@ class SSLSG(object):
         spec_ssl = np.zeros(size_of_spec)
         spec_ssl[0, :] = wavelength
         f_add = np.ones(size_of_spec[1])  # 用于构造A
-        matrix_A = (np.vstack((wavelength, f_add))).T  # 700 * 2
+        matrix_A = (np.vstack((wavelength, f_add))).T  # 2126 * 2
         for i in range(1, size_of_spec[0]):  # 从1开始，不算wavelength
             r = dot(dot(np.linalg.inv(dot(matrix_A.T, matrix_A)), matrix_A.T), spec[i, :])
             spec_ssl[i, :] = spec[i, :] - dot(matrix_A, r)
@@ -2678,10 +2686,12 @@ class SSLSG(object):
             polyorder = np.abs(np.int(polyorder))
         except ValueError as msg:
             raise ValueError("window_size and polyorder have to be of type int")
-        if window_size % 2 != 1 or window_size < 1:
-            raise TypeError("window_size size must be a positive odd number")
-        if window_size < polyorder + 2:
-            raise TypeError("window_size is too small for the polynomials polyorder")
+        if window_size % 2 != 1 or window_size < 2:
+            raise ValueError("window_size size must be a positive odd number")
+        if window_size < polyorder:  # polyorder must be less than window_size
+            raise ValueError("window_size is too small for the polynomials polyorder")
+        if deriv > polyorder:  # 'deriv' must be less than or equal to 'polyorder'
+            raise ValueError("请调小导数阶数！")
 
         n = spec.shape[0] - 1
         p = spec.shape[1]
@@ -2733,26 +2743,27 @@ class SSLSG(object):
 
         return spec_sg_matrix
 
-    def sslsg(self, spec, window_size=11, polyorder=2, deriv=1):
-        spec_ssl = self._ssl(spec)
-        spec_ssl_sg = self._sg(spec_ssl, window_size=window_size, polyorder=polyorder, deriv=deriv)
+    def sgssl(self, spec, window_size=11, polyorder=2, deriv=1):
+        spec_sg = self._sg(spec, window_size=window_size, polyorder=polyorder, deriv=deriv)
+        spec_sg_ssl = self._ssl(spec_sg)
 
-        return spec_ssl_sg
+        return spec_sg_ssl
 
     def fit_transform(self, spec):
         self.wavelength = spec[0, :]
-        spec_ssl = self._ssl(spec)
-        spec_ssl_sg = self._sg(spec_ssl, window_size=self.window_size, polyorder=self.polyorder, deriv=self.deriv)
+        spec_sg = self._sg(spec, window_size=self.window_size, polyorder=self.polyorder, deriv=self.deriv)
+        spec_sg_ssl = self._ssl(spec_sg)
 
-        return spec_ssl_sg
+        return spec_sg_ssl
 
     def transform(self, input_data):
         input_wavelength = input_data[0, :]
         if not (input_wavelength == self.wavelength).all():
             raise ValueError('光谱数据不兼容！')
-        spec_ssl = self._ssl(input_data)
-        spec_ssl_sg = self._sg(spec_ssl, window_size=self.window_size, polyorder=self.polyorder, deriv=self.deriv)
-        return spec_ssl_sg
+        spec_sg = self._sg(input_data, window_size=self.window_size, polyorder=self.polyorder, deriv=self.deriv)
+        spec_sg_ssl = self._ssl(spec_sg)
+
+        return spec_sg_ssl
 
 
 # +++++++++++++++  Used for data +++++++++++++++
@@ -2926,9 +2937,9 @@ def msc_list(spec_list, ideal_ab=None):
 
     return result_list
 
-def mscsg_list(spec_list, window_size=11, polyorder=2, deriv=1, ideal_ab=None):
+def sgmsc_list(spec_list, window_size=11, polyorder=2, deriv=1, ideal_ab=None):
     '''
-    先进行进行MSC，再求导
+    先进行求导,再进行MSC
     :param spec:
     :param deriv:
     :param window_size:
@@ -2940,8 +2951,8 @@ def mscsg_list(spec_list, window_size=11, polyorder=2, deriv=1, ideal_ab=None):
     if n == 1:
         raise ValueError('MSC针对多条光谱进行处理！')
     elif n > 1:
-        spec_msc_list = msc_list(spec_list, ideal_ab=ideal_ab)
-        result_list = sg_list(spec_msc_list, window_size=window_size, polyorder=polyorder, deriv=deriv)
+        spec_sg_list = sg_list(spec_list, window_size=window_size, polyorder=polyorder, deriv=deriv)
+        result_list = msc_list(spec_sg_list, ideal_ab=ideal_ab)
 
     return result_list
 
@@ -2992,7 +3003,7 @@ def zs_list(spec_list, avg_ab=None, std_ab=None):
     '''
     n = len(spec_list)
     if n == 1:
-        raise ValueError('ZS针对多条光谱进行处理！')
+        raise ValueError('MC针对多条光谱进行处理！')
     elif n > 1:
         result_list = []
         wavelength = spec_list[0][0, :]
@@ -3016,7 +3027,7 @@ def zs_list(spec_list, avg_ab=None, std_ab=None):
 def avg_list(spec_list):  # average
     n = len(spec_list)
     if n == 1:
-        raise ValueError('Average针对多条光谱进行处理！')
+        raise ValueError('MC针对多条光谱进行处理！')
     elif n > 1:
         wavelength = spec_list[0][0, :]
         ab_list = [spec[1, :] for spec in spec_list]  # 此处ab (1557,)
@@ -3134,10 +3145,12 @@ def sg_list(spec_list, window_size=11, polyorder=2, deriv=1):
         polyorder = np.abs(np.int(polyorder))
     except ValueError as msg:
         raise ValueError("window_size and polyorder have to be of type int")
-    if window_size % 2 != 1 or window_size < 1:
-        raise TypeError("window_size size must be a positive odd number")
-    if window_size < polyorder + 2:
-        raise TypeError("window_size is too small for the polynomials polyorder")
+    if window_size % 2 != 1 or window_size < 2:
+        raise ValueError("window_size size must be a positive odd number")
+    if window_size < polyorder:  # polyorder must be less than window_size
+        raise ValueError("window_size is too small for the polynomials polyorder")
+    if deriv > polyorder:  # 'deriv' must be less than or equal to 'polyorder'
+        raise ValueError("请调小导数阶数！")
 
     n = len(spec_list)
     half_size = window_size // 2
@@ -3192,7 +3205,7 @@ def sg_list(spec_list, window_size=11, polyorder=2, deriv=1):
 
     return result_list
 
-def snvsg_list(spec_list, window_size=11, polyorder=2, deriv=1):
+def sgsnv_list(spec_list, window_size=11, polyorder=2, deriv=1):
     '''
 
     :param spec_list:
@@ -3201,12 +3214,12 @@ def snvsg_list(spec_list, window_size=11, polyorder=2, deriv=1):
     :param deriv:
     :return:
     '''
-    spec_snv_list = snv_list(spec_list)
-    result_list = sg_list(spec_snv_list, window_size, polyorder, deriv)
+    spec_sg_list = sg_list(spec_list, window_size, polyorder, deriv)
+    result_list = snv_list(spec_sg_list)
 
     return result_list
 
-def sslsg_list(spec_list, window_size=11, polyorder=2, deriv=1):
+def sgssl_list(spec_list, window_size=11, polyorder=2, deriv=1):
     '''
 
     :param spec_list:
@@ -3215,8 +3228,8 @@ def sslsg_list(spec_list, window_size=11, polyorder=2, deriv=1):
     :param deriv:
     :return:
     '''
-    spec_ssl_list = ssl_list(spec_list)
-    result_list = sg_list(spec_ssl_list, window_size, polyorder, deriv)
+    spec_sg_list = sg_list(spec_list, window_size, polyorder, deriv)
+    result_list = ssl_list(spec_sg_list)
 
     return result_list
 
