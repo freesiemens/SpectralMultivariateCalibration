@@ -2086,7 +2086,6 @@ class MSC(object):
 class SGMSC(object):
     '''
      Savitzky-Golay + Multiplicative Scatter Correction 求导 + 多元散射校正
-     According to the Raman PLS model result of disel in OPUS, we should do SG first!!!
     '''
     def __init__(self, window_size=11, polyorder=2, deriv=1, ideal_ab=None):
         self.window_size = window_size
