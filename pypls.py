@@ -2085,7 +2085,7 @@ class MSC(object):
 
 class SGMSC(object):
     '''
-     Savitzky-Golay + Multiplicative Scatter Correction 求导 + 多元散射校正
+     Savitzky-Golay + Multiplicative Scatter Correction 一阶导 + 多元散射校正
     '''
     def __init__(self, window_size=11, polyorder=2, deriv=1, ideal_ab=None):
         self.window_size = window_size
@@ -2203,7 +2203,7 @@ class SGMSC(object):
     def fit_transform(self, spec):
         spec_sg = self._sg(spec, window_size=self.window_size, polyorder=self.polyorder, deriv=self.deriv)
         self.fit(spec_sg)
-        spec_sg_msc = self._msc(spec_sg)
+        spec_sg_msc = self._msc(spec_sg, ideal_ab=self.ideal_ab)
 
         return spec_sg_msc
 
