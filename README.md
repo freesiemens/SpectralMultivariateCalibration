@@ -74,20 +74,20 @@ The cal_result's outputs are as following:
 * samples_random_split
 
 5. Popular Pretreat methods for Spectroscopy
-* Multiplicative Scatter Correction(多元散射校正), MSC
-* Savitzky-Golay + Multiplicative Scatter Correction(一阶导+多元散射校正), SGMSC
-* Vector Normalization(矢量归一化), VN
-* Standard Normal Variate transformation(标准正态变量变换), SNV
-* Eliminate Constant Offset(消除常数偏移量), ECO
-* Subtract Straight Line(减去一条直线), SSL
-* De-Trending(去趋势), DT
-* Min-Max Normalization(最小最大归一化), MMN
-* Savitzky-Golay(平滑与求导), SG
-* Savitzky-Golay + SNV(一阶导+标准正态变量变换), SGSNV
-* SNV + DT(标准正态变量变换+去趋势), SNVDT
-* SG + SSL(一阶导+减去一条直线), SGSSL
-* Mean Centering(均值中心化), MC
-* Zscore Standardization(Zscore标准化), ZS
+* Multiplicative Scatter Correction (多元散射校正), MSC
+* Savitzky-Golay + Multiplicative Scatter Correction (一阶导+多元散射校正), SGMSC
+* Vector Normalization (矢量归一化), VN
+* Standard Normal Variate transformation (标准正态变量变换), SNV
+* Eliminate Constant Offset (消除常数偏移量), ECO
+* Subtract Straight Line (减去一条直线), SSL
+* De-Trending (去趋势), DT
+* Min-Max Normalization (最小最大归一化), MMN
+* Savitzky-Golay (平滑与求导), SG
+* Savitzky-Golay + SNV (一阶导+标准正态变量变换), SGSNV
+* SNV + DT (标准正态变量变换+去趋势), SNVDT
+* SG + SSL (一阶导+减去一条直线), SGSSL
+* Mean Centering (均值中心化), MC
+* Zscore Standardization (Zscore标准化), ZS
 
 
 Requirements
