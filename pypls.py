@@ -1899,7 +1899,7 @@ def generate_variable_indices(intersect_wavelength, customized_regions, threshol
 
             indices = np.array(np.arange(start_index, end_index + 1))
             indices_list.append(indices)
-    variable_indices = np.hstack((ind for ind in indices_list))
+    variable_indices = np.hstack([ind for ind in indices_list])  # 20200321修改成[]
 
     return variable_indices
 
@@ -2055,7 +2055,7 @@ class MSC(object):
         else:
             ab_mean = ideal_ab
         for i in range(size_of_ab[0]):  # 求出每条光谱的c和d，c = b[0]   d = b[1]
-            regression_coefficient = _lsr(ab_mean, ab[i, :], order=1)['regression_coefficient']
+            regression_coefficient = lsr(ab_mean, ab[i, :], order=1)['regression_coefficient']
             ab_msc[i, :] = (ab[i, :] - regression_coefficient[1]) / regression_coefficient[0]  # 利用广播法则
 
         spec_msc = np.vstack((wavelength, ab_msc))
@@ -2309,7 +2309,7 @@ class SSL(object):
         n_samples = ab.shape[0]
         ab_ssl = np.zeros(ab.shape)
         for i in range(n_samples):  # 求出趋势直线
-            fit_value = _lsr(wavelength, ab[i, :], order=1)['fit_value']
+            fit_value = lsr(wavelength, ab[i, :], order=1)['fit_value']
             ab_ssl[i, :] = ab[i, :] - fit_value.ravel()
         spec_ssl = np.vstack((wavelength, ab_ssl))
 
@@ -2341,7 +2341,7 @@ class DT(object):
         n_samples = ab.shape[0]
         ab_dt = np.zeros(ab.shape)
         for i in range(n_samples):  # 求出每条光谱的c和d，c = b[0]   d = b[1]
-            fit_value = _lsr(wavelength, ab[i, :], order=2)['fit_value']
+            fit_value = lsr(wavelength, ab[i, :], order=2)['fit_value']
             ab_dt[i, :] = ab[i, :] - fit_value.ravel()
         spec_dt = np.vstack((wavelength, ab_dt))
 
@@ -2621,7 +2621,7 @@ class SNVDT(object):
         n_samples = ab.shape[0]
         ab_dt = np.zeros(ab.shape)
         for i in range(n_samples):  # 求出每条光谱的c和d，c = b[0]   d = b[1]
-            fit_value = _lsr(wavelength, ab[i, :], order=2)['fit_value']
+            fit_value = lsr(wavelength, ab[i, :], order=2)['fit_value']
             ab_dt[i, :] = ab[i, :] - fit_value.ravel()
         spec_dt = np.vstack((wavelength, ab_dt))
 
