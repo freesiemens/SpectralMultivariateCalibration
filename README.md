@@ -57,17 +57,17 @@ The cal_result's outputs are as following:
         'just_y_outlier_list':
         'both_xy_outlier_list':
 
-2. Three PLS Algorithm:
+2. Three PLS Algorithms:
 * Improved Kernel Partial Least Squares, IKPLS
 * Nonlinear Iterative Partial Least Squares，NIPALS
 * Straightforward Implementation of a statistically inspired Modification of the Partial Least Squares, SIMPLS
 
-3. Several Sampling Algorithm:
+3. Several Sampling Algorithms:
 * montecarlo_sampling
 * ks_sampling(Kennard-Stone)
 * spxy_sampling
 
-4. Several Samples split Algorithm:
+4. Several Samples split Algorithms:
 * samples_systematic_split
 * samples_ks_split
 * samples_spxy_split
