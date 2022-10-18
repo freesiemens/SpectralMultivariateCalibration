@@ -346,10 +346,13 @@ class PartialLeastSquares(object):
 
         q_limit = zeros((len(sl), self.max_nlv))
         # refer to: Interpreting PLS plots
-        # The critical value of the Q-residuals are estimated from the eigenvalues of E,
-        # as described in Jackson and Mudholkar, 1979.
-        eigenvalues = np.sum(x_scores ** 2, axis=0) / (n_samples - 1)
+        # The critical value of the Q-residuals are estimated from the eigenvalues of E, as described in Jackson and Mudholkar, 1979.
         prevent_invalid_for_nan_warn = np.seterr(invalid='ignore')  # 最后一个隐变量的q_limit无法计算
+        eigenvalues_list = []
+        for lv in range(self.max_nlv):
+            e = q_result['residual_matrix_list'][lv]
+            U, S, V = np.linalg.svd(e, full_matrices=False)
+            eigenvalues_list.append(S ** 2 / (n_samples - 1))  # note the (n_samples - 1) part for unbiased estimate of var
 
         for i in range(self.max_nlv):  # 0:5 nlv
             for j in range(len(sl)):  # 不同显著性水平
@@ -368,7 +371,7 @@ class PartialLeastSquares(object):
                 t_critical_value[j, i] = t_critical_value_sl
 
                 # ---- q_limit
-                evalues_unused = eigenvalues[i + 1:]
+                evalues_unused = eigenvalues_list[i]
                 theta1 = np.sum(evalues_unused)
                 theta2 = np.sum(evalues_unused ** 2)
                 theta3 = np.sum(evalues_unused ** 3)
