@@ -356,7 +356,7 @@ class PartialLeastSquares(object):
 
         for i in range(self.max_nlv):  # 0:5 nlv
             for j in range(len(sl)):  # 不同显著性水平
-                # ---- t2_limit
+                # ---- t2_limit ----
                 nlv = i + 1
                 # .ppf的参数 q ---- lower tail probability
                 t2_limit_sl = nlv * (n_samples - 1) / (n_samples - nlv) * sps.f.ppf(1 - sl[j], nlv, n_samples - nlv)
@@ -370,7 +370,7 @@ class PartialLeastSquares(object):
                 t_critical_value_sl = sps.t.ppf(1 - sl[j] / 2, df)
                 t_critical_value[j, i] = t_critical_value_sl
 
-                # ---- q_limit
+                # ---- q_limit ----
                 evalues_unused = eigenvalues_list[i]
                 theta1 = np.sum(evalues_unused)
                 theta2 = np.sum(evalues_unused ** 2)
