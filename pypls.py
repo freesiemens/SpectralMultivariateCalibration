@@ -1113,7 +1113,7 @@ def cv_kfold_random_sampling(n_population, kfold=9, seed=999):
     train_indices_list = []
     test_indices_list = []
     rng = np.random.RandomState(seed)
-    fold_sizes = (n_population // kfold) * np.ones(kfold, dtype=np.int)  # other folds
+    fold_sizes = (n_population // kfold) * np.ones(kfold, dtype=np.int8)  # other folds
     fold_sizes[:n_population % kfold] += 1  # background 'n % kfold' folds
     population_indices = np.arange(n_population)  # 83
     for i in range(kfold):
@@ -1135,7 +1135,7 @@ def cv_kfold_systematic_sampling(n_population, kfold=9):
     train_indices_list = []
     test_indices_list = []
 
-    fold_sizes = ((n_population // kfold) + 1 ) * np.ones(kfold, dtype=np.int)
+    fold_sizes = ((n_population // kfold) + 1 ) * np.ones(kfold, dtype=np.int8)
     fold_sizes[n_population % kfold:] -= 1
 
     for i in range(kfold):
@@ -1157,10 +1157,10 @@ def cv_lpo_random_sampling(n_population, p=3, seed=999):
     mod = n_population % p
     if mod == 0:
         kfold = n_population // p
-        fold_sizes = p * np.ones(kfold, dtype=np.int)
+        fold_sizes = p * np.ones(kfold, dtype=np.int8)
     else:
         kfold = n_population // p + 1
-        fold_sizes = p * np.ones(kfold, dtype=np.int)
+        fold_sizes = p * np.ones(kfold, dtype=np.int8)
         fold_sizes[-1] = mod
     train_indices_list = []
     test_indices_list = []
@@ -1191,7 +1191,7 @@ def cv_lpo_systematic_sampling(n_population, p=3):
     if mod == 0:  # 能整除
         kfold = n_population // p
         interval = n_population // p
-        fold_sizes = p * np.ones(kfold, dtype=np.int)
+        fold_sizes = p * np.ones(kfold, dtype=np.int8)
         for i in range(kfold):
             test_indices = np.linspace(start=i, stop=(fold_sizes[i] - 1) * interval + i, num=fold_sizes[i], dtype=int)
             test_indices_list.append(test_indices)
@@ -1201,7 +1201,7 @@ def cv_lpo_systematic_sampling(n_population, p=3):
     else:  # 不能整除
         kfold = n_population // p + 1
         interval = n_population // p
-        fold_sizes = p * np.ones(kfold, dtype=np.int)
+        fold_sizes = p * np.ones(kfold, dtype=np.int8)
         fold_sizes[-1] = mod  # 最后一折个数为余数  14 % 4 = 2
         # ---------------- 处理前(kfold - 1)折 ----------------
         for i in range(kfold - 1):
@@ -2130,8 +2130,8 @@ class SGMSC(object):
         :return:
         '''
         try:
-            window_size = np.abs(np.int(window_size))
-            polyorder = np.abs(np.int(polyorder))
+            window_size = np.abs(np.int8(window_size))
+            polyorder = np.abs(np.int8(polyorder))
         except ValueError as msg:
             raise ValueError("window_size and polyorder have to be of type int")
         if window_size % 2 != 1 or window_size < 2:
@@ -2419,8 +2419,8 @@ class SG(object):
         :return:
         '''
         try:
-            window_size = np.abs(np.int(window_size))
-            polyorder = np.abs(np.int(polyorder))
+            window_size = np.abs(np.int8(window_size))
+            polyorder = np.abs(np.int8(polyorder))
         except ValueError as msg:
             raise ValueError("window_size and polyorder have to be of type int")
         if window_size % 2 != 1 or window_size < 2:
@@ -2519,8 +2519,8 @@ class SGSNV(object):
         :return:
         '''
         try:
-            window_size = np.abs(np.int(window_size))
-            polyorder = np.abs(np.int(polyorder))
+            window_size = np.abs(np.int8(window_size))
+            polyorder = np.abs(np.int8(polyorder))
         except ValueError as msg:
             raise ValueError("window_size and polyorder have to be of type int")
         if window_size % 2 != 1 or window_size < 2:
@@ -2684,8 +2684,8 @@ class SGSSL(object):
         :return:
         '''
         try:
-            window_size = np.abs(np.int(window_size))
-            polyorder = np.abs(np.int(polyorder))
+            window_size = np.abs(np.int8(window_size))
+            polyorder = np.abs(np.int8(polyorder))
         except ValueError as msg:
             raise ValueError("window_size and polyorder have to be of type int")
         if window_size % 2 != 1 or window_size < 2:
@@ -3143,8 +3143,8 @@ def sg_list(spec_list, window_size=11, polyorder=2, deriv=1):
     :return:
     '''
     try:
-        window_size = np.abs(np.int(window_size))
-        polyorder = np.abs(np.int(polyorder))
+        window_size = np.abs(np.int8(window_size))
+        polyorder = np.abs(np.int8(polyorder))
     except ValueError as msg:
         raise ValueError("window_size and polyorder have to be of type int")
     if window_size % 2 != 1 or window_size < 2:
