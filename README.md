@@ -93,7 +93,7 @@ The cal_result's outputs are as following:
 Requirements
 ------------
 
-Written using Python 3.6.3, numpy 1.15.4, scipy 1.1.0
+Written using Python 3.11.1, numpy 1.24.3, scipy 1.11.1
 
 
 Acknowledgement
