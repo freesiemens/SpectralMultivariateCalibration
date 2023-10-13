@@ -1117,7 +1117,7 @@ def cv_kfold_random_sampling(n_population, kfold=9, seed=999):
     fold_sizes[:n_population % kfold] += 1  # background 'n % kfold' folds
     population_indices = np.arange(n_population)  # 83
     for i in range(kfold):
-        mask = zeros(n_population, dtype=np.bool)
+        mask = zeros(n_population, dtype=bool)
         test_indices = rng.choice(population_indices, fold_sizes[i], replace=False)
         mask[test_indices] = True  # 选中的标记True
         train_indices = np.arange(n_population)[~mask]  # 用于训练集
@@ -1139,7 +1139,7 @@ def cv_kfold_systematic_sampling(n_population, kfold=9):
     fold_sizes[n_population % kfold:] -= 1
 
     for i in range(kfold):
-        mask = zeros(n_population, dtype=np.bool)
+        mask = zeros(n_population, dtype=bool)
         test_indices = np.linspace(start=i, stop=kfold*(fold_sizes[i] - 1) + i, num=fold_sizes[i], dtype=int)
         test_indices_list.append(test_indices)
         mask[test_indices] = True  
@@ -1229,7 +1229,7 @@ def montecarlo_sampling(n_population, test_size=0.2, seed=999):
     rng = np.random.RandomState(seed)
     n_test = int(n_population * test_size)  # 81*0.2=16
     # n_train = n - n_test
-    mask = zeros(n_population, dtype=np.bool)
+    mask = zeros(n_population, dtype=bool)
     a = np.arange(n_population)
     rng.shuffle(a)
     test_indices = rng.choice(a, n_test, replace=False)
