@@ -5,13 +5,15 @@
 Email: jiangsukust@163.com
 
 """
-
 import scipy.io as sio
 from pypls import *
+import os
 
 # ++++++++++++++++++++++++++++ 导入数据 & 建立模型 ++++++++++++++++++++++++++++++++++++++++++
 # ================== step1: Load DataSet ==================
-data = sio.loadmat(r'Diesel_without_outlier.mat')
+mat_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), r'Diesel_without_outlier.mat')
+data = sio.loadmat(mat_path)
+
 # -------------- 以总芳烃 total_aromatics 为例 --------------
 xcal = data['total_aromatics_xcal']  # 校正集波长与吸光度，第一行为波长 (119, 401)
 wavelength = xcal[1, :]
@@ -199,6 +201,28 @@ mre_range_full = np.mean(np.abs(range_full_predict_result['predict_value'].ravel
 mre_range_1_modified = np.mean(np.abs(range_1_modified_predict_result['predict_value'].ravel() - range_1_modified_ytest) / range_1_modified_ytest)
 
 
+
+# ++++++++++++++++++++++++++++ 计算RPD ++++++++++++++++++++++++++
+sd_range_1 = np.std(range_1_ytest, ddof=1)
+sd_range_2 = np.std(range_2_ytest, ddof=1)
+sd_range_3 = np.std(range_3_ytest, ddof=1)
+sd_range_full = np.std(range_full_ytest, ddof=1)
+sd_range_1_modified = np.std(range_1_modified_ytest, ddof=1)
+
+sep_range_1 = range_1_predict_result['sep']
+sep_range_2 = range_2_predict_result['sep']
+sep_range_3 = range_3_predict_result['sep']
+sep_range_full = range_full_predict_result['sep']
+sep_range_1_modified = range_1_modified_predict_result['sep']
+
+rpd_range_1 = sd_range_1 / sep_range_1
+rpd_range_2 = sd_range_2 / sep_range_2
+rpd_range_3 = sd_range_3 / sep_range_3
+rpd_range_full = sd_range_full / sep_range_full
+rpd_range_1_modified = sd_range_1_modified / sep_range_1_modified
+
+# 上述RPD值应与predict_result['rpd']相同
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 print('Thank you!')
