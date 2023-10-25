@@ -161,6 +161,7 @@ sst_range_2 = np.sum((range_2_ytest - range_2_ytest.mean()) ** 2)
 sst_range_3 = np.sum((range_3_ytest - range_3_ytest.mean()) ** 2)
 sst_range_full = np.sum((range_full_ytest - range_full_ytest.mean()) ** 2)
 
+# sep1 = sqrt(press / n_samples) = sqrt(sse / n_samples)
 rmsep_range_1 = range_1_predict_result['rmsep']
 rmsep_range_2 = range_2_predict_result['rmsep']
 rmsep_range_3 = range_3_predict_result['rmsep']
@@ -183,16 +184,23 @@ range_1_modified_predict_result = pls_instance.predict(testset_spec_intersect = 
                                                        nlv=None,
                                                        testset_indices=None,
                                                        testset_target=range_1_modified_ytest)
+sse_range_1_modified = np.sum((range_1_modified_predict_result['predict_value'].ravel() - range_1_modified_ytest) ** 2)
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 
 # ++++++++++++++++++++++++++++ 其他统计量 ++++++++++++++++++++++++++
-mae_range_1 = np.sum(np.abs(range_1_predict_result['predict_value'].ravel() - range_1_ytest)) / len(range_1_ytest)
-mae_range_2 = np.sum(np.abs(range_2_predict_result['predict_value'].ravel() - range_2_ytest)) / len(range_2_ytest)
-mae_range_3 = np.sum(np.abs(range_3_predict_result['predict_value'].ravel() - range_3_ytest)) / len(range_3_ytest)
-mae_range_full = np.sum(np.abs(range_full_predict_result['predict_value'].ravel() - range_full_ytest)) / len(range_full_ytest)
-mae_range_1_modified = np.sum(np.abs(range_1_modified_predict_result['predict_value'].ravel() - range_1_modified_ytest)) / len(range_1_modified_ytest)
+n_samples_range_1 = len(range_1_ytest)
+n_samples_range_2 = len(range_2_ytest)
+n_samples_range_3 = len(range_3_ytest)
+n_samples_range_full = len(range_full_ytest)
+n_samples_range_1_modified = len(range_1_modified_ytest)
+
+mae_range_1 = np.sum(np.abs(range_1_predict_result['predict_value'].ravel() - range_1_ytest)) / n_samples_range_1
+mae_range_2 = np.sum(np.abs(range_2_predict_result['predict_value'].ravel() - range_2_ytest)) / n_samples_range_2
+mae_range_3 = np.sum(np.abs(range_3_predict_result['predict_value'].ravel() - range_3_ytest)) / n_samples_range_3
+mae_range_full = np.sum(np.abs(range_full_predict_result['predict_value'].ravel() - range_full_ytest)) / n_samples_range_full
+mae_range_1_modified = np.sum(np.abs(range_1_modified_predict_result['predict_value'].ravel() - range_1_modified_ytest)) / n_samples_range_1_modified
 
 mre_range_1 = np.mean(np.abs(range_1_predict_result['predict_value'].ravel() - range_1_ytest) / range_1_ytest)
 mre_range_2 = np.mean(np.abs(range_2_predict_result['predict_value'].ravel() - range_2_ytest) / range_2_ytest)
@@ -202,13 +210,14 @@ mre_range_1_modified = np.mean(np.abs(range_1_modified_predict_result['predict_v
 
 
 
-# ++++++++++++++++++++++++++++ 计算RPD ++++++++++++++++++++++++++
+# ++++++++++++++++++++++++++++ 采用SEP2计算RPD ++++++++++++++++++++++++++
 sd_range_1 = np.std(range_1_ytest, ddof=1)
 sd_range_2 = np.std(range_2_ytest, ddof=1)
 sd_range_3 = np.std(range_3_ytest, ddof=1)
 sd_range_full = np.std(range_full_ytest, ddof=1)
 sd_range_1_modified = np.std(range_1_modified_ytest, ddof=1)
 
+# sep2 = sqrt((np.sum((error - bias) * (error - bias), axis=0)) / (n_samples - 1))
 sep_range_1 = range_1_predict_result['sep']
 sep_range_2 = range_2_predict_result['sep']
 sep_range_3 = range_3_predict_result['sep']
@@ -224,6 +233,33 @@ rpd_range_1_modified = sd_range_1_modified / sep_range_1_modified
 # 上述RPD值应与predict_result['rpd']相同
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+
+# ++++++++++++++++++++++++++++ 采用SEP3计算RPD ++++++++++++++++++++++++++
+# sep3 = sqrt(sse / (n_samples - 1))
+sep3_range_1 = sqrt(sse_range_1 / (n_samples_range_1 - 1))
+sep3_range_2 = sqrt(sse_range_2 / (n_samples_range_2 - 1))
+sep3_range_3 = sqrt(sse_range_3 / (n_samples_range_3 - 1))
+sep3_range_full = sqrt(sse_range_full / (n_samples_range_full - 1))
+sep3_range_1_modified = sqrt(sse_range_1_modified / (n_samples_range_1_modified - 1))
+
+rpd_sep3_range_1 = sd_range_1 / sep3_range_1
+rpd_sep3_range_2 = sd_range_2 / sep3_range_2
+rpd_sep3_range_3 = sd_range_3 / sep3_range_3
+rpd_sep3_range_full = sd_range_full / sep3_range_full
+rpd_sep3_range_1_modified = sd_range_1_modified / sep3_range_1_modified
+
+# rpd_sep3_range_1 ** 2
+# rpd_sep3_range_2 ** 2
+# rpd_sep3_range_3 ** 2
+# rpd_sep3_range_full ** 2
+# rpd_sep3_range_1_modified ** 2
+
+# 1 / (1 - r2_range_1)
+# 1 / (1 - r2_range_2)
+# 1 / (1 - r2_range_3)
+# 1 / (1 - r2_range_full)
+# 1 / (1 - range_1_modified_predict_result['r2'])
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 print('Thank you!')
 
