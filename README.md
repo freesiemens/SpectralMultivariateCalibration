@@ -99,8 +99,10 @@ Dependencies
 
 Acknowledgement
 ------------
-
-OPUS by Bruker, Unscrambler by CAMO, Pirouette by Infometrix, PLS_Toolbox by Eigenvector
+* OPUS by Bruker
+* Unscrambler by CAMO
+* Pirouette by Infometrix
+* PLS_Toolbox by Eigenvector
 
 
 References
