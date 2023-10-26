@@ -90,10 +90,11 @@ The cal_result's outputs are as following:
 * Zscore Standardization (Zscore标准化, ZS)
 
 
-Requirements
+Dependencies
 ------------
-
-Written using Python 3.11.5, numpy 1.24.3, scipy 1.11.1
+* Python 3.11.5
+* numpy 1.24.3
+* scipy 1.11.1
 
 
 Acknowledgement
