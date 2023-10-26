@@ -178,7 +178,7 @@ class PartialLeastSquares(object):
             sec_lv = sqrt(np.sum(e * e, axis=0) / df)
             sec[i] = sec_lv
 
-            reg_coeff = lsr(reference_value, fit_value[:, i], order=1)['regression_coefficient']
+            reg_coeff = polynomial_fit(reference_value, fit_value[:, i], order=1)['regression_coefficient']
             linear_regression_coefficient[:, i] = reg_coeff.ravel()
 
         # ------------ 预测标准误差 SEP (Standard Error of Prediction)  refer to OPUS, User friendly
@@ -1802,7 +1802,8 @@ def rmse_calc(predict_value, reference_value):
     # linear_regression_coefficient (2, max_nlv) slope,intercept
     linear_regression_coefficient = zeros((2, max_nlv))
     for i in range(max_nlv):
-        reg_coeff = lsr(reference_value, predict_value[:, i], order=1)['regression_coefficient']
+        # reg_coeff = lsr(reference_value, predict_value[:, i], order=1)['regression_coefficient']
+        reg_coeff = polynomial_fit(reference_value, predict_value[:, i], order=1)['regression_coefficient']
         linear_regression_coefficient[:, i] = reg_coeff.ravel()
 
     relative_error = np.abs(error) / reference_value
@@ -2058,7 +2059,7 @@ class MSC(object):
         else:
             ab_mean = ideal_ab
         for i in range(size_of_ab[0]):  # 求出每条光谱的c和d，c = b[0]   d = b[1]
-            regression_coefficient = lsr(ab_mean, ab[i, :], order=1)['regression_coefficient']
+            regression_coefficient = polynomial_fit(ab_mean, ab[i, :], order=1)['regression_coefficient']
             ab_msc[i, :] = (ab[i, :] - regression_coefficient[1]) / regression_coefficient[0]  # 利用广播法则
 
         spec_msc = np.vstack((wavelength, ab_msc))
@@ -2312,7 +2313,7 @@ class SSL(object):
         n_samples = ab.shape[0]
         ab_ssl = np.zeros(ab.shape)
         for i in range(n_samples):  # 求出趋势直线
-            fit_value = lsr(wavelength, ab[i, :], order=1)['fit_value']
+            fit_value = polynomial_fit(wavelength, ab[i, :], order=1)['fit_value']
             ab_ssl[i, :] = ab[i, :] - fit_value.ravel()
         spec_ssl = np.vstack((wavelength, ab_ssl))
 
@@ -2344,7 +2345,7 @@ class DT(object):
         n_samples = ab.shape[0]
         ab_dt = np.zeros(ab.shape)
         for i in range(n_samples):  # 求出每条光谱的c和d，c = b[0]   d = b[1]
-            fit_value = lsr(wavelength, ab[i, :], order=2)['fit_value']
+            fit_value = polynomial_fit(wavelength, ab[i, :], order=2)['fit_value']
             ab_dt[i, :] = ab[i, :] - fit_value.ravel()
         spec_dt = np.vstack((wavelength, ab_dt))
 
@@ -2624,7 +2625,7 @@ class SNVDT(object):
         n_samples = ab.shape[0]
         ab_dt = np.zeros(ab.shape)
         for i in range(n_samples):  # 求出每条光谱的c和d，c = b[0]   d = b[1]
-            fit_value = lsr(wavelength, ab[i, :], order=2)['fit_value']
+            fit_value = polynomial_fit(wavelength, ab[i, :], order=2)['fit_value']
             ab_dt[i, :] = ab[i, :] - fit_value.ravel()
         spec_dt = np.vstack((wavelength, ab_dt))
 
@@ -2863,33 +2864,33 @@ def generate_polynomial(X, order=1):
 
     return A
 
-def lsr(X, y, order=1):  # 默认1次
+def polynomial_fit(x, y, order=1):  # 默认1次
     '''
-    Least Square Regression 最小二乘回归
-    :param X:
+    Least squares polynomial fit.
+    :param x:
     :param y:
-    :param order: 1,2,3... 适应多项式回归
+    :param order: 1,2,3...
     :return:
     regression_coefficient -
     fit_value -    fit_transform result (m X 1 column vector)
     residual -    residual   (m X 1 column vector)
     '''
-    if X.ndim == 1:
-        X = X[:, np.newaxis]  # 如果一维数组，转成二维
-    if y.ndim == 1:
-        y = y[:, np.newaxis]  # 如果一维数组，转成二维
-    if X.shape[0] != y.shape[0]:
+    if x.ndim > 1:
+        x = x.ravel()
+    if y.ndim > 1:
+        y = y.ravel()
+    if len(x) != len(y):
         raise ValueError('The number of samples is not equal!')
-    n_samples = X.shape[0]
-    intercept = np.ones((n_samples, 1))  # offset 截距
-    A = generate_polynomial(X, order=order)
-    regression_coefficient = dot(dot(inv(dot(A.T, A)), A.T), y)  # 系数(2,1)
-    fit_value = dot(A, regression_coefficient)
+    z = np.polyfit(x, y, deg=order)
+    p = np.poly1d(z)
+    fit_value = p(x)
     residual = fit_value - y
+    regression_coefficient = z
 
     return {'regression_coefficient':regression_coefficient,
             'fit_value':fit_value,
             'residual':residual}
+
 
 
 

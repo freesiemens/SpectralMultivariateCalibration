@@ -8,6 +8,7 @@ Email: jiangsukust@163.com
 
 import scipy.io as sio
 from pypls import *
+import os
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -19,7 +20,9 @@ from pypls import *
 # A number of NBS glass standards were also measured on each instrument.
 # The data was originally taken at Cargill.
 
-data = sio.loadmat(r'Benchmark_Corn.mat')
+mat_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), r'Benchmark_Corn.mat')
+data = sio.loadmat(mat_path)
+
 # the only difference between 'spectra' and 'absorbance' is that
 # 'spectra' array includes wavelength in the first row.
 
@@ -50,7 +53,7 @@ pls_instance = PartialLeastSquares(algorithm='ikpls_algorithm',
                                    max_nlv=20,
                                    pretreat_method1='SGMSC',
                                    pretreat_params1={'window_size':5, 'deriv':1},
-                                   pretreat_method2='ZS',
+                                   pretreat_method2='MC',
                                    customized_regions=[[1100, 1500], [1600, 2400]])
 
 # -------------- cross validation --------------
