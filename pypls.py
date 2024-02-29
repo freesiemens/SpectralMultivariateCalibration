@@ -2419,17 +2419,17 @@ class SG(object):
         :param deriv:
         :return:
         '''
-        try:
-            window_size = np.abs(int(window_size))
-            polyorder = np.abs(int(polyorder))
-        except ValueError as msg:
-            raise ValueError("window_size and polyorder have to be of type int")
-        if window_size % 2 != 1 or window_size < 2:
-            raise ValueError("window_size size must be a positive odd number")
-        if window_size < polyorder:  # polyorder must be less than window_size
-            raise ValueError("window_size is too small for the polynomials polyorder")
-        if deriv > polyorder:  # 'deriv' must be less than or equal to 'polyorder'
-            raise ValueError("请调小导数阶数！")
+        # ============ check parameters ============
+        if not isinstance(window_size, int) or not isinstance(polyorder, int) or not isinstance(deriv, int):
+            raise ValueError("'window_size', 'polyorder' and 'deriv' must be of type int")
+        if window_size < 0 or polyorder < 0 or deriv < 0:
+            raise ValueError("'window_size', 'polyorder' and 'deriv' cannot be less than 0")
+        if window_size % 2 != 1 or window_size < 3:
+            raise ValueError("'window_size' must be a positive odd number and greater than or equal to 3")
+        if polyorder > window_size - 1:  # polyorder must be less than window_size
+            raise ValueError("'polyorder' must be less than 'window_size'")
+        if deriv > polyorder:  # deriv must be less than polyorder
+            raise ValueError("'deriv' must be less than or equal to 'polyorder'")
 
         n = spec.shape[0] - 1
         p = spec.shape[1]
@@ -2519,17 +2519,17 @@ class SGSNV(object):
         :param deriv:
         :return:
         '''
-        try:
-            window_size = np.abs(int(window_size))
-            polyorder = np.abs(int(polyorder))
-        except ValueError as msg:
-            raise ValueError("window_size and polyorder have to be of type int")
-        if window_size % 2 != 1 or window_size < 2:
-            raise ValueError("window_size size must be a positive odd number")
-        if window_size < polyorder:  # polyorder must be less than window_size
-            raise ValueError("window_size is too small for the polynomials polyorder")
-        if deriv > polyorder:  # 'deriv' must be less than or equal to 'polyorder'
-            raise ValueError("请调小导数阶数！")
+        # ============ check parameters ============
+        if not isinstance(window_size, int) or not isinstance(polyorder, int) or not isinstance(deriv, int):
+            raise ValueError("'window_size', 'polyorder' and 'deriv' must be of type int")
+        if window_size < 0 or polyorder < 0 or deriv < 0:
+            raise ValueError("'window_size', 'polyorder' and 'deriv' cannot be less than 0")
+        if window_size % 2 != 1 or window_size < 3:
+            raise ValueError("'window_size' must be a positive odd number and greater than or equal to 3")
+        if polyorder > window_size - 1:  # polyorder must be less than window_size
+            raise ValueError("'polyorder' must be less than 'window_size'")
+        if deriv > polyorder:  # deriv must be less than polyorder
+            raise ValueError("'deriv' must be less than or equal to 'polyorder'")
 
         n = spec.shape[0] - 1
         p = spec.shape[1]
@@ -2684,17 +2684,17 @@ class SGSSL(object):
         :param deriv:
         :return:
         '''
-        try:
-            window_size = np.abs(int(window_size))
-            polyorder = np.abs(int(polyorder))
-        except ValueError as msg:
-            raise ValueError("window_size and polyorder have to be of type int")
-        if window_size % 2 != 1 or window_size < 2:
-            raise ValueError("window_size size must be a positive odd number")
-        if window_size < polyorder:  # polyorder must be less than window_size
-            raise ValueError("window_size is too small for the polynomials polyorder")
-        if deriv > polyorder:  # 'deriv' must be less than or equal to 'polyorder'
-            raise ValueError("请调小导数阶数！")
+        # ============ check parameters ============
+        if not isinstance(window_size, int) or not isinstance(polyorder, int) or not isinstance(deriv, int):
+            raise ValueError("'window_size', 'polyorder' and 'deriv' must be of type int")
+        if window_size < 0 or polyorder < 0 or deriv < 0:
+            raise ValueError("'window_size', 'polyorder' and 'deriv' cannot be less than 0")
+        if window_size % 2 != 1 or window_size < 3:
+            raise ValueError("'window_size' must be a positive odd number and greater than or equal to 3")
+        if polyorder > window_size - 1:  # polyorder must be less than window_size
+            raise ValueError("'polyorder' must be less than 'window_size'")
+        if deriv > polyorder:  # deriv must be less than polyorder
+            raise ValueError("'deriv' must be less than or equal to 'polyorder'")
 
         n = spec.shape[0] - 1
         p = spec.shape[1]
