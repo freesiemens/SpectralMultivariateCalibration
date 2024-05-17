@@ -52,7 +52,7 @@ ytest = target[testset_indices]
 pls_instance = PartialLeastSquares(algorithm='ikpls_algorithm',
                                    max_nlv=20,
                                    pretreat_method1='SGMSC',
-                                   pretreat_params1={'window_size':5, 'deriv':1},
+                                   pretreat_params1={'window_size':11, 'deriv':1},
                                    pretreat_method2='MC',
                                    customized_regions=[[1100, 1500], [1600, 2400]])
 
