@@ -56,6 +56,63 @@
       safe && window.open(href, '_blank', 'noopener,noreferrer');
     }
   });
+})();</script><script data-od-sandbox-shim="">(function(){
+  function makeStore(){
+    var data = {};
+    var api = {
+      getItem: function(k){ return Object.prototype.hasOwnProperty.call(data, k) ? data[k] : null; },
+      setItem: function(k, v){ data[k] = String(v); },
+      removeItem: function(k){ delete data[k]; },
+      clear: function(){ data = {}; },
+      key: function(i){ return Object.keys(data)[i] || null; }
+    };
+    Object.defineProperty(api, 'length', { get: function(){ return Object.keys(data).length; } });
+    return api;
+  }
+  function tryShim(name){
+    var works = false;
+    try { works = !!window[name] && typeof window[name].getItem === 'function'; void window[name].length; }
+    catch (_) { works = false; }
+    if (works) return;
+    try { Object.defineProperty(window, name, { configurable: true, value: makeStore() }); }
+    catch (_) { try { window[name] = makeStore(); } catch (__) {} }
+  }
+  tryShim('localStorage');
+  tryShim('sessionStorage');
+  document.addEventListener('click', (e) => {
+    if (!e.target || !(e.target instanceof Element)) return;
+    var link = e.target.closest('a[href]');
+    if (!link) return;
+    var href = link.getAttribute('href');
+    if (href === null) return;
+    var isAnchor = href.startsWith('#') || href === '';
+    if (isAnchor) {
+      e.preventDefault();
+      if (href === '' || href === '#') {
+        window.scrollTo({ top: 0 });
+        history.replaceState(null, '', ' ');
+      } else {
+        var targetId = href.slice(1);
+        var target = targetId ? document.getElementById(targetId) : null;
+        if (target) {
+          target.scrollIntoView();
+          location.hash === href && history.replaceState(null, '', ' ');
+          location.hash = href;
+        }
+      }
+    } else if (link.getAttribute('target') === '_blank') {
+      e.preventDefault();
+      let safe = false;
+      try {
+        var url = new URL(href, location.href);
+        safe =
+          url.protocol === 'http:' ||
+          url.protocol === 'https:' ||
+          url.protocol === 'mailto:';
+      } catch (_) {}
+      safe && window.open(href, '_blank', 'noopener,noreferrer');
+    }
+  });
 })();</script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -685,16 +742,16 @@
           <div class="section-label" data-od-id="path-1-1-0-1-0">01 · Introduction</div>
           <h2 data-od-id="path-1-1-0-1-1">引言</h2>
           <p>时至今日，笔者对十几年前被用户问及模型的 \(\mathit{RPD}\) 是多少却未能马上解答一事仍记忆犹新。因为，在平常的工作中大家主要关注的是内部交叉验证的 \(\mathit{RMSECV}\) 和 \(R^2\)，而外部验证时则更常看 \(\mathit{RMSEP}\)、\(R^2\)、\(\mathit{MAE}\)（平均绝对误差）和 \(\mathit{MRE}\)（平均相对误差）等统计指标，未曾单独计算过 \(\mathit{RPD}\)，尽管长期的实践证明这样做并无不妥，但当年的尴尬却一直如鲠在喉。</p>
-          <p>\(\mathit{RPD}\) 的概念最早是由 Phil Williams（P.C. Williams）于 1986 年提出的，目的是为了引入一种快速评估近红外模型的简单方法<sup>[1]</sup>。1993 年，Williams 与 Sobering（二者当时均任职于加拿大谷物委员会下属的谷物研究实验室）合著论文<sup>[2]</sup>发表在 <em>Journal of Near Infrared Spectroscopy</em> 上，这是提出者第一次将 \(\mathit{RPD}\) 带到同行评审刊，将其用于谷物和种子物化参数的近红外模型评估。</p>
-          <aside class="note" data-od-id="path-1-1-0-1-4"><strong>注：</strong>值得一提的是，Williams 与已故近红外之父 Karl Norris 有过诸多合作，Williams 也凭借其在近红外光谱分析领域的卓越贡献获得了多个奖项，其中就包括 2015 年 ICNIRS Karl Norris Award（2014 年首届奖章颁给了 Karl Norris 本人）。</aside>
         </section>
 
         <section id="origin" data-od-id="path-1-1-0-2">
           <div class="section-label" data-od-id="path-1-1-0-2-0">02 · Definition</div>
           <h2 data-od-id="path-1-1-0-2-1">RPD 的由来与定义</h2>
+          <p>\(\mathit{RPD}\) 的概念最早是由 Phil Williams（P.C. Williams）于 1986 年提出的，目的是为了引入一种快速评估近红外模型的简单方法<sup>[1]</sup>。1993 年，Williams 与 Sobering（二者当时均任职于加拿大谷物委员会下属的谷物研究实验室）合著论文<sup>[2]</sup>发表在 <em>Journal of Near Infrared Spectroscopy</em> 上，这是提出者第一次将 \(\mathit{RPD}\) 带到同行评审刊，将其用于谷物和种子物化参数的近红外模型评估。</p>
+          <aside class="note" data-od-id="path-1-1-0-2-3"><strong>注：</strong>值得一提的是，Williams 与已故近红外之父 Karl Norris 有过诸多合作，Williams 也凭借其在近红外光谱分析领域的卓越贡献获得了多个奖项，其中就包括 2015 年 ICNIRS Karl Norris Award（2014 年首届奖章颁给了 Karl Norris 本人）。</aside>
           <p>原文中对 \(\mathit{RPD}\) 的定义为：“the RPD, which is the ratio of the SEP to the standard deviation (SD) of the original data.”；同时给出了具体的示例：“For example, if the standard deviation of the original data is 1.83 and the SEP is 0.27, the RPD is given by 1.83/0.27 = 6.78.”；因此，其公式如下：</p>
 
-          <div class="math-block" data-od-id="path-1-1-0-2-3">
+          <div class="math-block" data-od-id="path-1-1-0-2-5">
             \[ \mathit{RPD} = \frac{\mathit{SD}}{\mathit{SEP}} = \frac{\sqrt{\frac{1}{n-1}\sum_{i=1}^{n}(y_i - \bar{y})^2}}{\mathit{SEP}} \]
           </div>
           <p>其中：</p>
@@ -705,7 +762,7 @@
             <li><span class="sym">\(\mathit{SEP}\)</span><span class="sym-desc">— Standard Error of Prediction，预测标准误差</span></li>
           </ul>
 
-          <p>看到这里，不知道读者们有没有发现一个问题，\(\mathit{RPD}\) 的文字定义与公式之间是矛盾的。我们也可以在 IM Publications 下的近红外论坛上看到同样的疑问，“We probably need to ask Phil why it is RPD and not RDP!”，见 <a href="http://www.impublications.com/discus/messages/5/2136.html?1190896505=" target="_blank" rel="noopener" data-od-id="path-1-1-0-2-6-0">impublications.com 讨论帖</a>。</p>
+          <p>看到这里，不知道读者们有没有发现一个问题，\(\mathit{RPD}\) 的文字定义与公式之间是矛盾的。我们也可以在 IM Publications 下的近红外论坛上看到同样的疑问，“We probably need to ask Phil why it is RPD and not RDP!”，见 <a href="http://www.impublications.com/discus/messages/5/2136.html?1190896505=" target="_blank" rel="noopener" data-od-id="path-1-1-0-2-8-0">impublications.com 讨论帖</a>。</p>
           <p>当然，我们现在无法揣测 Williams 当初如此定义的用意。有意思的是，Williams 在 2017 年的一篇论文中描述 \(\mathit{RPD}\) 时使用的是 “Ratio of SD to SE in validation or CV”<sup>[3]</sup>。不管如何，自 1993 年之后，\(\mathit{RPD}\) 开始在近红外分析领域流行起来了，数以千计的期刊论文、教科书、会议论文、海报中都能看到它的身影。</p>
           <p>事实上，在多年的使用过程中，这个名词有过多种释义，例如：ratio of standard deviation of reference results and standard error of performance of NIR data<sup>[4]</sup>、ratio of the standard error of performance to the standard deviation<sup>[5]</sup>、ratio of performance to deviation<sup>[6]</sup>、residual predictive deviation<sup>[7; 8]</sup>……。而且，从其首次提出时使用测试集表征预测性能（分母为 \(\mathit{SEP}\)），也发展到了用于校正阶段（分母为 \(\mathit{SEC}\)）和内部交叉验证阶段（分母为 \(\mathit{SECV}\)）。</p>
           <p>下面，我们来聊聊与 \(\mathit{RPD}\) 相关的两个问题。</p>
@@ -745,7 +802,7 @@
 
           <aside class="note" data-od-id="path-1-1-0-3-11">
             <strong>注 1：</strong> \(\sum d_i^2\) 即 \(\mathit{SSE}\)（Sum of Squares Error）或 \(\mathit{PRESS}\)（Predictive Residual Error Sum of Squares）。<br>
-            <strong>注 2：</strong> \(n\cdot\mathit{SEP}_1^2 = (n-1)\mathit{SEP}_2^2 + n\cdot\mathit{bias}^2\)（推导过程略）。<br>
+            <strong>注 2：</strong> \(n\cdot(\mathit{SEP}_1)^2 = (n-1)(\mathit{SEP}_2)^2 + n\cdot(\mathit{bias})^2\)（推导过程略）。<br>
             <strong>注 3：</strong> \(\mathit{SEP}_2\)（扣除了 \(\mathit{bias}\)）的值并非肯定小于 \(\mathit{SEP}_1\)（\(\mathit{RMSEP}\)），当 \(\mathit{bias}\) 较小且 \(n\) 不大时，\(\mathit{SEP}_2\) 甚至会大于 \(\mathit{SEP}_1\)。<br>
             <strong>注 4：</strong>笔者个人倾向于将 \(\mathit{SEP}_1\) 和 \(\mathit{SEP}_2\) 的定义区分开来，即将 \(\mathit{SEP}_2\) 定义为预测误差的标准偏差，如此便应采用式 (2) 的表达，根号下分母为 \(n-1\)（样本标准偏差）；而 \(\mathit{SEP}_1\) 的定义似乎从未产生过争议（分母为 \(n\)），亦即 \(\mathit{RMSEP}\)（均方误差开平方）。在机器学习和深度学习领域 \(\mathit{MSE}\) 应用更广泛，是一种常见的损失函数，通常将其称作 L2-Loss，例如：mean_squared_error（scikit-learn、Keras）、MSELoss（PyTorch、PaddlePaddle）、L2Loss（mxnet）……
           </aside>
@@ -756,24 +813,24 @@
           </div>
           <p>结合 \(\mathit{SD}\) 的公式，可得：</p>
           <div class="math-block" data-od-id="path-1-1-0-3-15">
-            \[ R^2 = 1 - \frac{\displaystyle\sum_{i=1}^{n}d_i^2}{(n-1)\cdot\mathit{SD}^2} \]
+            \[ R^2 = 1 - \frac{\displaystyle\sum_{i=1}^{n}d_i^2}{(n-1)\cdot(\mathit{SD})^2} \]
           </div>
           <p>那么有：</p>
           <div class="math-block" data-od-id="path-1-1-0-3-17">
-            \[ 1-R^2 = \frac{\displaystyle\sum_{i=1}^{n}d_i^2}{(n-1)\cdot\mathit{SD}^2} = \frac{n\cdot\mathit{SEP}_1^2}{(n-1)\cdot\mathit{SD}^2} = \frac{(n-1)\cdot\mathit{SEP}_3^2}{(n-1)\cdot\mathit{SD}^2} \]
+            \[ 1-R^2 = \frac{\displaystyle\sum_{i=1}^{n}d_i^2}{(n-1)\cdot(\mathit{SD})^2} = \frac{n\cdot(\mathit{SEP}_1)^2}{(n-1)\cdot(\mathit{SD})^2} = \frac{(n-1)\cdot(\mathit{SEP}_3)^2}{(n-1)\cdot(\mathit{SD})^2} \]
           </div>
           <p>因为有 \(\mathit{RPD}=\mathit{SD}/\mathit{SEP}\)，不难看出：</p>
           <p>如果采用 \(\mathit{SEP}_3\)，那么</p>
           <div class="math-block" data-od-id="path-1-1-0-3-20">
-            \[ \mathit{RPD}^2 = \frac{1}{1-R^2} \]
+            \[ (\mathit{RPD})^2 = \frac{1}{1-R^2} \]
           </div>
           <p>如果采用 \(\mathit{SEP}_2\) 且 \(\mathit{bias}\) 趋近于 0，有</p>
           <div class="math-block" data-od-id="path-1-1-0-3-22">
-            \[ \mathit{RPD}^2 \approx \frac{1}{1-R^2} \]
+            \[ (\mathit{RPD})^2 \approx \frac{1}{1-R^2} \]
           </div>
           <p>如果采用 \(\mathit{SEP}_1\) 且 \(n\) 较大，即可忽略 \(n\) 与 \(n-1\) 之间的差异，也有</p>
           <div class="math-block" data-od-id="path-1-1-0-3-24">
-            \[ \mathit{RPD}^2 \approx \frac{1}{1-R^2} \]
+            \[ (\mathit{RPD})^2 \approx \frac{1}{1-R^2} \]
           </div>
           <p>因此，不管采用何种 \(\mathit{SEP}\) 定义，也无论 \(\mathit{bias}\) 与 \(n\) 的大小，\(\mathit{RPD}\) 与 \(R^2\) 之间都存在正相关关系，即随着 \(\mathit{RPD}\) 的增大而增大 \(R^2\)，随着 \(\mathit{SEP}\) 的减小而增大 \(\mathit{RPD}\)。</p>
           <p>注：因为 \(R^2 \in (-\infty,1]\)，当模型性能较差时，\(R^2\) 可能出现负值，此时 \(\mathit{RPD}&lt;1\)（\(\mathit{SEP}&gt;\mathit{SD}\)）。</p>
@@ -847,13 +904,13 @@
               <tbody>
                 <tr><td>\(\mathit{SEP}_3\)</td><td>0.72020</td><td>0.68091</td><td>0.63175</td><td>0.69176</td><td>0.73983</td></tr>
                 <tr><td>\(\mathit{RPD}\)</td><td>1.39916</td><td>2.77459</td><td>4.05207</td><td>8.78130</td><td>5.36765</td></tr>
-                <tr><td>\(\mathit{RPD}^2\)</td><td>1.95764</td><td>7.69834</td><td>16.41931</td><td>77.11131</td><td>28.81169</td></tr>
+                <tr><td>\((\mathit{RPD})^2\)</td><td>1.95764</td><td>7.69834</td><td>16.41931</td><td>77.11131</td><td>28.81169</td></tr>
                 <tr><td>\(1/(1-R^2)\)</td><td>1.95764</td><td>7.69834</td><td>16.41931</td><td>77.11131</td><td>28.81169</td></tr>
               </tbody>
             </table>
           </div>
 
-          <p>显然，表 2 的结果证实了前文「如果采用 \(\mathit{SEP}_3\)，那么 \(\mathit{RPD}^2=1/(1-R^2)\)」这一结论。</p>
+          <p>显然，表 2 的结果证实了前文「如果采用 \(\mathit{SEP}_3\)，那么 \((\mathit{RPD})^2=1/(1-R^2)\)」这一结论。</p>
 
           <div class="callout" data-od-id="path-1-1-0-5-8">
             <strong>结论：</strong>任何一个近红外模型都有其适用范围，如果抛开具体的应用场景，仅使用一个 \(\mathit{RPD}\) 数值来判断模型是否可用，未免过于「武断」。进行模型评价时应该综合考虑多个统计量的结果；此外，预测值 vs. 参考值的散点图尤为重要——一图胜千言。
@@ -1088,6 +1145,146 @@ function initMath() {
       window.parent.postMessage({ type: 'od:snapshot:result', id: id, error: 'snapshot image failed' }, '*');
     };
     img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  }
+  window.addEventListener('message', function(ev){
+    var data = ev && ev.data;
+    if (!data || data.type !== 'od:snapshot' || !data.id) return;
+    waitForImages().then(function(){ renderSnapshot(String(data.id)); });
+  });
+})();</script><script data-od-srcdoc-transport-activation="">(function(){
+  window.addEventListener('message', function(ev){
+    var data = ev && ev.data;
+    if (!data || data.type !== 'od:srcdoc-transport-activate' || typeof data.html !== 'string') return;
+    document.open();
+    document.write(data.html);
+    document.close();
+  });
+})();</script><script data-od-snapshot-bridge="">(function(){
+  var SNAPSHOT_STYLE_PROPS = [
+    'display','position','box-sizing','width','height','min-width','max-width','min-height','max-height',
+    'margin','margin-top','margin-right','margin-bottom','margin-left',
+    'padding','padding-top','padding-right','padding-bottom','padding-left',
+    'border','border-top','border-right','border-bottom','border-left','border-radius',
+    'font','font-family','font-size','font-weight','font-style','line-height','letter-spacing',
+    'color','background-color','opacity','transform','transform-origin','overflow','overflow-x','overflow-y',
+    'white-space','text-align','vertical-align','object-fit','object-position',
+    'flex','flex-direction','flex-wrap','flex-grow','flex-shrink','flex-basis',
+    'grid','grid-template-columns','grid-template-rows','grid-column','grid-row',
+    'gap','row-gap','column-gap','align-items','align-content','align-self',
+    'justify-items','justify-content','justify-self','inset','top','right','bottom','left',
+    'z-index','box-shadow','text-shadow'
+  ];
+  function copyComputedStyle(source, target){
+    if (!source || !target || source.nodeType !== 1 || target.nodeType !== 1) return;
+    var computed = window.getComputedStyle(source);
+    var style = target.getAttribute('style') || '';
+    for (var i = 0; i < SNAPSHOT_STYLE_PROPS.length; i++){
+      var prop = SNAPSHOT_STYLE_PROPS[i];
+      var value = computed.getPropertyValue(prop);
+      if (value) style += prop + ':' + value + ';';
+    }
+    target.setAttribute('style', style);
+  }
+  function syncElementState(source, target){
+    var tag = source.tagName ? source.tagName.toLowerCase() : '';
+    if (tag === 'img' && source.currentSrc) target.setAttribute('src', source.currentSrc);
+    if (tag === 'input' || tag === 'textarea') target.setAttribute('value', source.value || '');
+    if (tag === 'canvas') {
+      try {
+        var img = document.createElement('img');
+        img.setAttribute('src', source.toDataURL('image/png'));
+        img.setAttribute('style', target.getAttribute('style') || '');
+        target.parentNode && target.parentNode.replaceChild(img, target);
+      } catch (_) {}
+    }
+  }
+  function inlineSnapshotStyles(originalRoot, cloneRoot){
+    copyComputedStyle(originalRoot, cloneRoot);
+    syncElementState(originalRoot, cloneRoot);
+    var originals = originalRoot.querySelectorAll('*');
+    var clones = cloneRoot.querySelectorAll('*');
+    var count = Math.min(originals.length, clones.length, 3500);
+    for (var i = 0; i < count; i++){
+      copyComputedStyle(originals[i], clones[i]);
+      syncElementState(originals[i], clones[i]);
+    }
+    var scripts = cloneRoot.querySelectorAll('script');
+    for (var s = scripts.length - 1; s >= 0; s--) scripts[s].remove();
+    var links = cloneRoot.querySelectorAll('link[rel~="stylesheet"], link[rel~="preload"], link[rel~="preconnect"]');
+    for (var l = links.length - 1; l >= 0; l--) links[l].remove();
+    var styles = cloneRoot.querySelectorAll('style');
+    for (var st = 0; st < styles.length; st++) {
+      styles[st].textContent = (styles[st].textContent || '')
+        .replace(/@import[^;]+;/gi, '')
+        .replace(/@font-face\s*\{[^}]*\}/gi, '');
+    }
+  }
+  function waitForImages(){
+    var imgs = Array.prototype.slice.call(document.images || []);
+    return Promise.all(imgs.map(function(img){
+      if (img.complete) return Promise.resolve();
+      return new Promise(function(resolve){
+        img.addEventListener('load', resolve, { once: true });
+        img.addEventListener('error', resolve, { once: true });
+      });
+    }));
+  }
+  function scrollOffset(){
+    var doc = document.documentElement;
+    var body = document.body;
+    return {
+      x: Math.max(window.scrollX || 0, doc ? doc.scrollLeft || 0 : 0, body ? body.scrollLeft || 0 : 0),
+      y: Math.max(window.scrollY || 0, doc ? doc.scrollTop || 0 : 0, body ? body.scrollTop || 0 : 0)
+    };
+  }
+  function escapeAttribute(value){
+    return String(value || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  }
+  function renderSnapshot(id){
+    var w = Math.max(1, window.innerWidth || document.documentElement.clientWidth || 1);
+    var h = Math.max(1, window.innerHeight || document.documentElement.clientHeight || 1);
+    var dpr = window.devicePixelRatio || 1;
+    var docW = Math.max(w, document.documentElement.scrollWidth || 0, document.body ? document.body.scrollWidth : 0);
+    var docH = Math.max(h, document.documentElement.scrollHeight || 0, document.body ? document.body.scrollHeight : 0);
+    var clone = document.documentElement.cloneNode(true);
+    clone.setAttribute('xmlns', 'http://www.w3.org/1999/xhtml');
+    inlineSnapshotStyles(document.documentElement, clone);
+    var scroll = scrollOffset();
+    var cloneBody = clone.querySelector('body');
+    var rootStyle = clone.getAttribute('style') || '';
+    var bodyStyle = cloneBody ? cloneBody.getAttribute('style') || '' : '';
+    var bodyContent = cloneBody ? cloneBody.innerHTML : clone.innerHTML;
+    var wrapperStyle = rootStyle + bodyStyle +
+      'margin:0;position:relative;left:' + (-scroll.x) + 'px;top:' + (-scroll.y) + 'px;' +
+      'width:' + docW + 'px;height:' + docH + 'px;overflow:visible;';
+    var html = '<div xmlns="http://www.w3.org/1999/xhtml" style="' + escapeAttribute(wrapperStyle) + '">' + bodyContent + '</div>';
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '">' +
+      '<foreignObject x="0" y="0" width="' + docW + '" height="' + docH + '">' +
+      html +
+      '</foreignObject></svg>';
+    var img = new Image();
+    img.onload = function(){
+      try {
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.floor(w * dpr));
+        canvas.height = Math.max(1, Math.floor(h * dpr));
+        var ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('no 2d context');
+        ctx.scale(dpr, dpr);
+        ctx.drawImage(img, 0, 0, w, h);
+        window.parent.postMessage({ type: 'od:snapshot:result', id: id, dataUrl: canvas.toDataURL('image/png'), w: canvas.width, h: canvas.height }, '*');
+      } catch (err) {
+        window.parent.postMessage({ type: 'od:snapshot:result', id: id, error: String(err && err.message || err) }, '*');
+      }
+    };
+    function encodedSvgDataUrl(){
+      var encoded = encodeURIComponent(svg);
+      return 'data:image/svg+xml;charset=utf-8,' + encoded;
+    }
+    img.onerror = function(){
+      window.parent.postMessage({ type: 'od:snapshot:result', id: id, error: 'snapshot image failed' }, '*');
+    };
+    img.src = encodedSvgDataUrl();
   }
   window.addEventListener('message', function(ev){
     var data = ev && ev.data;
